@@ -6,6 +6,8 @@ import (
 	"io"
 	"net"
 	"time"
+
+	"github.com/gofrs/uuid"
 	"github.com/lazybark/go-helpers/npt"
 )
 
