@@ -36,7 +36,7 @@ type Connection struct {
 
 	//bs holds total bytes sent by server in connection
 	bs int
-	//br holds total bytes sent by client in connection
+	//br holds total bytes recieved by server in connection
 	br int
 	//errors holds total number of errors occured in connection
 	errors int
