@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var ver = "1.0.0"
+var ver = "1.0.1"
 
 type Server struct {
 	timeStart time.Time
@@ -53,6 +53,9 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	s.Stat = make(map[string]Stat)
 	s.connPoolMutex = sync.RWMutex{}
 
+	if conf == nil {
+		conf = &Config{}
+	}
 	//Default terminator is the newline
 	if conf.MessageTerminator == 0 {
 		conf.MessageTerminator = '\n'
@@ -63,11 +66,11 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	}
 	//KeepOldConnections by default is 24 hours
 	if conf.KeepOldConnections == 0 {
-		conf.BufferSize = 1440
+		conf.KeepOldConnections = 1440
 	}
 	//KeepInactiveConnections by default is 72 hours
 	if conf.KeepInactiveConnections == 0 {
-		conf.BufferSize = 4320
+		conf.KeepInactiveConnections = 4320
 	}
 	s.sConfig = conf
 
