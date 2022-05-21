@@ -1,12 +1,8 @@
 package v1
 
 import (
-	"context"
 	"crypto/tls"
 	"fmt"
-	"time"
-
-	"github.com/gofrs/uuid"
 )
 
 //Listen runs listener interface implementations and accepts connections
@@ -31,13 +27,12 @@ func (s *Server) Listen(port string) {
 		if err != nil && !s.sConfig.SuppressErrors {
 			s.ErrChan <- fmt.Errorf("[Server][Listen] error accepting connection from %v: %w", conn.RemoteAddr(), err)
 		}
-		//Make connection struct
-		id, err := uuid.NewV4()
+
+		c, err := NewConnection(conn.RemoteAddr(), conn)
 		if err != nil && !s.sConfig.SuppressErrors {
 			s.ErrChan <- fmt.Errorf("[Server][Listen] error making connection Id for %v: %w", conn.RemoteAddr(), err)
 		}
-		ctx, cancel := context.WithCancel(context.Background())
-		c := &Connection{id: id.String(), connectedAt: time.Now(), addr: conn.RemoteAddr(), conn: conn, lastAct: time.Now(), ctx: ctx, cancel: cancel}
+
 		//Add to pool
 		s.addToPool(c)
 		//Notify outer routine

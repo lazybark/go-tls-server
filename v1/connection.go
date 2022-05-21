@@ -40,6 +40,27 @@ type Connection struct {
 	errors int
 }
 
+func NewConnection(ip net.Addr, conn net.Conn) (*Connection, error) {
+	c := new(Connection)
+	c.connectedAt = npt.Now()
+	c.lastAct = c.connectedAt
+	//Make connection struct
+	id, err := uuid.NewV4()
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+
+	c.id = id.String()
+	c.addr = ip
+	c.conn = conn
+	c.cancel = cancel
+	c.ctx = ctx
+
+	return c, nil
+
+}
+
 //ConnectedAt returns time the connection was init
 func (c *Connection) ConnectedAt() time.Time {
 	return c.connectedAt.Time()

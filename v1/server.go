@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var ver = "1.0.1"
+var ver = "1.0.2"
 
 type Server struct {
 	timeStart time.Time
