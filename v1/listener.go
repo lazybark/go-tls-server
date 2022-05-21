@@ -56,6 +56,6 @@ func (s *Server) recieve(c *Connection) {
 			return
 		}
 		s.addRecBytes(n)
-		s.MessageChan <- &Message{conn: c, bytes: b}
+		s.MessageChan <- &Message{conn: c, length: n, bytes: b}
 	}
 }
