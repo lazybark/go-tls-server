@@ -111,6 +111,10 @@ func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]by
 			n, err := c.conn.Read(b)
 			if err != nil {
 				c.errors++
+				if err == io.EOF {
+					c.close()
+					return nil, read, fmt.Errorf("[ReadWithContext] stream closed")
+				}
 				return nil, read, fmt.Errorf("[ReadWithContext] reading error: %w", err)
 			}
 			read += n
@@ -133,12 +137,6 @@ func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]by
 				return nil, read, fmt.Errorf("[ReadWithContext] message size limits reached")
 			}
 			rb = append(rb, b[:n]...)
-
-			if err == io.EOF {
-				c.errors++
-				c.close()
-				return nil, read, fmt.Errorf("[ReadWithContext] stream closed")
-			}
 		}
 	}
 }
