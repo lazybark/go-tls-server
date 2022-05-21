@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"time"
+	"github.com/lazybark/go-helpers/npt"
 )
 
 //Connection represents incoming client connection
@@ -13,7 +14,7 @@ type Connection struct {
 	//id is an unique string to define connection
 	id string
 	//connectedAt time of connection init
-	connectedAt time.Time
+	connectedAt npt.NPT
 	//addr is the remote address of client
 	addr net.Addr
 	//conn is the connection interface that reads and writes bytes
@@ -21,9 +22,9 @@ type Connection struct {
 	//isClosed = true means that connection was closed and soon will be dropped from pool
 	isClosed bool
 
-	closedAt time.Time
+	closedAt npt.NPT
 	//lastAct updates every time there was any action in connection
-	lastAct time.Time
+	lastAct npt.NPT
 
 	//ctx is the connection context
 	ctx    context.Context
@@ -41,15 +42,25 @@ type Connection struct {
 
 //ConnectedAt returns time the connection was init
 func (c *Connection) ConnectedAt() time.Time {
-	return c.connectedAt
+	return c.connectedAt.Time()
+}
+
+//ConnectedAt returns time the connection was init
+func (c *Connection) ClosedAt() time.Time {
+	return c.closedAt.Time()
+}
+
+//ConnectedAt returns time the connection was init
+func (c *Connection) LastAct() time.Time {
+	return c.lastAct.Time()
 }
 
 //Online returns duration of the connection
 func (c *Connection) Online() time.Duration {
 	if c.isClosed {
-		return c.closedAt.Sub(c.connectedAt)
+		return c.ClosedAt().Sub(c.ConnectedAt())
 	}
-	return time.Since(c.connectedAt)
+	return time.Since(c.ConnectedAt())
 }
 
 //Address returns remote address of client
@@ -118,7 +129,7 @@ func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]by
 				return nil, read, fmt.Errorf("[ReadWithContext] reading error: %w", err)
 			}
 			read += n
-			c.lastAct = time.Now()
+			c.lastAct.ToNow()
 			//We check every byte searching for terminator
 			for num, by := range b[:n] {
 				if by == terminator {
@@ -146,7 +157,7 @@ func (c *Connection) SendByte(b []byte, term byte) (int, error) {
 	b = append(b, term)
 	bs, err := c.conn.Write(b)
 	c.bs += bs
-	c.lastAct = time.Now()
+	c.lastAct.ToNow()
 	if err != nil {
 		c.errors++
 		return bs, fmt.Errorf("[SendByte] error writing response: %w", err)

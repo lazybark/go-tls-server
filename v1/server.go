@@ -142,12 +142,12 @@ func (s *Server) adminRoutine() {
 		case <-time.After(time.Hour):
 			for _, c := range s.connPool {
 				//If conn is closed and time now is already after the moment it should be deleted permanently
-				if c.isClosed && !time.Now().Before(c.closedAt.Add(time.Minute*time.Duration(s.sConfig.KeepOldConnections))) {
+				if c.isClosed && !time.Now().Before(c.ClosedAt().Add(time.Minute*time.Duration(s.sConfig.KeepOldConnections))) {
 					s.remFromPool(c)
 					continue
 				}
 				//If it's not closed, but it's been a 'KeepInactiveConnections' time after
-				if !c.isClosed && s.sConfig.KeepInactiveConnections > 0 && !time.Now().Before(c.lastAct.Add(time.Minute*time.Duration(s.sConfig.KeepInactiveConnections))) {
+				if !c.isClosed && s.sConfig.KeepInactiveConnections > 0 && !time.Now().Before(c.LastAct().Add(time.Minute*time.Duration(s.sConfig.KeepInactiveConnections))) {
 					s.CloseConnection(c)
 				}
 			}
