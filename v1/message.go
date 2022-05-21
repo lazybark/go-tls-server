@@ -16,3 +16,8 @@ func (m *Message) Bytes() []byte {
 func (m *Message) Length() int {
 	return m.length
 }
+
+//Length returns message bytes length
+func (m *Message) Conn() *Connection {
+	return m.conn
+}
