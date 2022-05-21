@@ -14,7 +14,10 @@ type Server struct {
 	timeStart time.Time
 	//host = hostname of the server
 	host string
-	//connPool is a map of pointers to connections
+	//connPool is a map of pointers to connections.
+	//
+	//In this case pointers are used to increase code readability and number of ops
+	//needed to change conn state
 	connPool map[string]*Connection
 	//connPoolMutex controls connPool
 	connPoolMutex sync.RWMutex
