@@ -116,7 +116,7 @@ func (c *Connection) addRecBytes(n int) {
 	c.br += n
 }
 
-//ReadContext reads bytes from connection until Terminator or error occurs or context is done.
+//readWithContext reads bytes from connection until Terminator or error occurs or context is done.
 //It can be used to read with timeout or any other way to break reader.
 //
 //Usual readers are vulnerable to routine-leaks, so this way is more confident.
@@ -138,7 +138,7 @@ func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]by
 	b := make([]byte, buffer)
 	for {
 		select {
-		case <-time.After(5 * time.Second):
+		case <-c.ctx.Done():
 			// Break by context
 			return nil, read, fmt.Errorf("[ReadWithContext] reader closed by context")
 		default:
@@ -148,6 +148,9 @@ func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]by
 				if err == io.EOF {
 					c.close()
 					return nil, read, fmt.Errorf("[ReadWithContext] stream closed")
+				}
+				if c.ctx.Done() != nil {
+					return nil, read, fmt.Errorf("[ReadWithContext] reader closed by context")
 				}
 				return nil, read, fmt.Errorf("[ReadWithContext] reading error: %w", err)
 			}
