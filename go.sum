@@ -1,2 +1,4 @@
 github.com/gofrs/uuid v4.2.0+incompatible h1:yyYWMnhkhrKwwr8gAOcOCYxOOscHgDS9yZgBrnJfGa0=
 github.com/gofrs/uuid v4.2.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=
+github.com/lazybark/go-helpers v1.0.0 h1:pGaXUntBt9FwWJyH0IFYKMIXEPyWRhcnTYH5f/kuIec=
+github.com/lazybark/go-helpers v1.0.0/go.mod h1:U8fMJ+Aq9W8lnUZOFCKmSc0SkN86qUu3ThgC+v1/Zag=
