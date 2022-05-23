@@ -63,6 +63,7 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	if conf.MessageTerminator == 0 {
 		conf.MessageTerminator = '\n'
 	}
+
 	//Default buffer is 128 B
 	if conf.BufferSize == 0 {
 		conf.BufferSize = 128
@@ -91,14 +92,10 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 }
 
 //StartedAt returns starting time
-func (s *Server) StartedAt() time.Time {
-	return s.timeStart
-}
+func (s *Server) StartedAt() time.Time { return s.timeStart }
 
 //Online returns time online
-func (s *Server) Online() time.Duration {
-	return time.Since(s.timeStart)
-}
+func (s *Server) Online() time.Duration { return time.Since(s.timeStart) }
 
 //ActiveConnetions returns number of active connections
 func (s *Server) TotalConnetions() int {
@@ -112,9 +109,7 @@ func (s *Server) TotalConnetions() int {
 }
 
 //Version returns app version
-func (s *Server) Version() string {
-	return ver
-}
+func (s *Server) Version() string { return ver }
 
 //CloseConnection is the only correct way to close connection.
 //It changes conn state in pool and then calls to c.close

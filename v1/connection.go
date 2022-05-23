@@ -64,19 +64,13 @@ func NewConnection(ip net.Addr, conn net.Conn) (*Connection, error) {
 }
 
 //ConnectedAt returns time the connection was init
-func (c *Connection) ConnectedAt() time.Time {
-	return c.connectedAt.Time()
-}
+func (c *Connection) ConnectedAt() time.Time { return c.connectedAt.Time() }
 
 //ConnectedAt returns time the connection was init
-func (c *Connection) ClosedAt() time.Time {
-	return c.closedAt.Time()
-}
+func (c *Connection) ClosedAt() time.Time { return c.closedAt.Time() }
 
 //ConnectedAt returns time the connection was init
-func (c *Connection) LastAct() time.Time {
-	return c.lastAct.Time()
-}
+func (c *Connection) LastAct() time.Time { return c.lastAct.Time() }
 
 //Online returns duration of the connection
 func (c *Connection) Online() time.Duration {
@@ -87,19 +81,13 @@ func (c *Connection) Online() time.Duration {
 }
 
 //Address returns remote address of client
-func (c *Connection) Address() net.Addr {
-	return c.addr
-}
+func (c *Connection) Address() net.Addr { return c.addr }
 
 //Closed returns true if the connection was closed
-func (c *Connection) Closed() bool {
-	return c.isClosed
-}
+func (c *Connection) Closed() bool { return c.isClosed }
 
 //Id returns connection ID in pool
-func (c *Connection) Id() string {
-	return c.id
-}
+func (c *Connection) Id() string { return c.id }
 
 //close closes the connection with remote and sets isClosed as true
 func (c *Connection) close() error {
@@ -112,9 +100,7 @@ func (c *Connection) close() error {
 }
 
 //addRecBytes adds number to count of total recieved bytes
-func (c *Connection) addRecBytes(n int) {
-	c.br += n
-}
+func (c *Connection) addRecBytes(n int) { c.br += n }
 
 //readWithContext reads bytes from connection until Terminator or error occurs or context is done.
 //It can be used to read with timeout or any other way to break reader.
@@ -192,6 +178,4 @@ func (c *Connection) SendByte(b []byte, term byte) (int, error) {
 }
 
 //SendString converts s into byte slice and calls to SendByte
-func (c *Connection) SendString(s string, term byte) (int, error) {
-	return c.SendByte([]byte(s), term)
-}
+func (c *Connection) SendString(s string, term byte) (int, error) { return c.SendByte([]byte(s), term) }
