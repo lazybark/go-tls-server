@@ -12,13 +12,16 @@ var ver = "1.0.4"
 
 type Server struct {
 	timeStart time.Time
+
 	//host = hostname of the server
 	host string
+
 	//connPool is a map of pointers to connections.
 	//
 	//In this case pointers are used to increase code readability and number of ops
 	//needed to change conn state
 	connPool map[string]*Connection
+
 	//connPoolMutex controls connPool
 	connPoolMutex sync.RWMutex
 
@@ -27,15 +30,19 @@ type Server struct {
 
 	//tlsConfig points to tls listener config
 	tlsConfig *tls.Config
+
 	//sConfig points to server config
 	sConfig *Config
 
 	//ErrChan is the channel to send errors into external routine
 	ErrChan chan error
+
 	//ServerDoneChan is the channel to recieve server stopping command
 	ServerDoneChan chan bool
+
 	//ConnChan is the channel to notify external routine about new connection
 	ConnChan chan *Connection
+
 	//MessageChan channel to notify external routine about new messages
 	MessageChan chan *Message
 
