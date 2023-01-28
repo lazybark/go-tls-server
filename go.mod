@@ -4,5 +4,5 @@ go 1.18
 
 require (
 	github.com/gofrs/uuid v4.2.0+incompatible
-	github.com/lazybark/go-helpers v1.0.0
+	github.com/lazybark/go-helpers v1.3.0
 )

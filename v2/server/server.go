@@ -1,4 +1,4 @@
-package v1
+package server
 
 import (
 	"crypto/tls"
@@ -6,11 +6,20 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"github.com/lazybark/go-helpers/semver"
 )
 
-var ver = "1.0.4"
+var ver = semver.Ver{
+	Major:  2,
+	Minor:  0,
+	Patch:  0,
+	Stable: true,
+}
 
 type Server struct {
+	ver semver.Ver
+
 	timeStart time.Time
 
 	//host = hostname of the server
@@ -50,7 +59,7 @@ type Server struct {
 	Stat map[string]Stat
 }
 
-//New initializes server instance and makes it completely ready to listen for connections
+// New initializes server instance and makes it completely ready to listen for connections
 func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	s := new(Server)
 	s.timeStart = time.Now()
@@ -62,6 +71,7 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	s.connPool = make(map[string]*Connection)
 	s.Stat = make(map[string]Stat)
 	s.connPoolMutex = sync.RWMutex{}
+	s.ver = ver
 
 	if conf == nil {
 		conf = &Config{}
@@ -98,13 +108,13 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	return s, nil
 }
 
-//StartedAt returns starting time
+// StartedAt returns starting time
 func (s *Server) StartedAt() time.Time { return s.timeStart }
 
-//Online returns time online
+// Online returns time online
 func (s *Server) Online() time.Duration { return time.Since(s.timeStart) }
 
-//ActiveConnetions returns number of active connections
+// ActiveConnetions returns number of active connections
 func (s *Server) TotalConnetions() int {
 	a := 0
 	for _, c := range s.connPool {
@@ -115,31 +125,34 @@ func (s *Server) TotalConnetions() int {
 	return a
 }
 
-//Version returns app version
-func (s *Server) Version() string { return ver }
+// Version returns app version
+func (s *Server) Version() semver.Ver { return s.ver }
 
-//CloseConnection is the only correct way to close connection.
-//It changes conn state in pool and then calls to c.close
+// Version returns app version string
+func (s *Server) VersionString() string { return s.ver.String() }
+
+// CloseConnection is the only correct way to close connection.
+// It changes conn state in pool and then calls to c.close
 func (s *Server) CloseConnection(c *Connection) error {
 	c.isClosed = true
 	return c.close()
 }
 
-//addToPool adds connection to fool for controlling
+// addToPool adds connection to fool for controlling
 func (s *Server) addToPool(c *Connection) {
 	s.connPoolMutex.Lock()
 	s.connPool[c.id] = c
 	s.connPoolMutex.Unlock()
 }
 
-//remFromPool removes connection pointer from pool, so it becomes unavailable to reach
+// remFromPool removes connection pointer from pool, so it becomes unavailable to reach
 func (s *Server) remFromPool(c *Connection) {
 	s.connPoolMutex.Lock()
 	delete(s.connPool, c.id)
 	s.connPoolMutex.Unlock()
 }
 
-//adminRoutine controls server behaviour: drops closed connections, closes inactive ones and stops the server in case s.ServerDoneChan
+// adminRoutine controls server behaviour: drops closed connections, closes inactive ones and stops the server in case s.ServerDoneChan
 func (s *Server) adminRoutine() {
 	for {
 		select {
@@ -174,7 +187,7 @@ func (s *Server) adminRoutine() {
 	}
 }
 
-//SendByte calls to c.SendByte and adds sent bytes to Stat
+// SendByte calls to c.SendByte and adds sent bytes to Stat
 func (s *Server) SendByte(c *Connection, b []byte) error {
 	n, err := c.SendByte(b, s.sConfig.MessageTerminator)
 	s.addSentBytes(n)
@@ -184,7 +197,7 @@ func (s *Server) SendByte(c *Connection, b []byte) error {
 	return err
 }
 
-//SendString calls to c.SendString and adds sent bytes to Stat
+// SendString calls to c.SendString and adds sent bytes to Stat
 func (s *Server) SendString(c *Connection, str string) error {
 	n, err := c.SendString(str, s.sConfig.MessageTerminator)
 	s.addSentBytes(n)

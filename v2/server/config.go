@@ -1,4 +1,4 @@
-package v1
+package server
 
 type Config struct {
 	//SuppressErrors stops server from sending errors into ErrChan.

@@ -1,4 +1,4 @@
-package v1
+package server
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/lazybark/go-helpers/npt"
 )
 
-//Connection represents incoming client connection
+// Connection represents incoming client connection
 type Connection struct {
 	//id is an unique string to define connection
 	id string
@@ -63,16 +63,16 @@ func NewConnection(ip net.Addr, conn net.Conn) (*Connection, error) {
 
 }
 
-//ConnectedAt returns time the connection was init
+// ConnectedAt returns time the connection was init
 func (c *Connection) ConnectedAt() time.Time { return c.connectedAt.Time() }
 
-//ConnectedAt returns time the connection was init
+// ConnectedAt returns time the connection was init
 func (c *Connection) ClosedAt() time.Time { return c.closedAt.Time() }
 
-//ConnectedAt returns time the connection was init
+// ConnectedAt returns time the connection was init
 func (c *Connection) LastAct() time.Time { return c.lastAct.Time() }
 
-//Online returns duration of the connection
+// Online returns duration of the connection
 func (c *Connection) Online() time.Duration {
 	if c.isClosed {
 		return c.ClosedAt().Sub(c.ConnectedAt())
@@ -80,16 +80,16 @@ func (c *Connection) Online() time.Duration {
 	return time.Since(c.ConnectedAt())
 }
 
-//Address returns remote address of client
+// Address returns remote address of client
 func (c *Connection) Address() net.Addr { return c.addr }
 
-//Closed returns true if the connection was closed
+// Closed returns true if the connection was closed
 func (c *Connection) Closed() bool { return c.isClosed }
 
-//Id returns connection ID in pool
+// Id returns connection ID in pool
 func (c *Connection) Id() string { return c.id }
 
-//close closes the connection with remote and sets isClosed as true
+// close closes the connection with remote and sets isClosed as true
 func (c *Connection) close() error {
 	err := c.conn.Close()
 	if err != nil {
@@ -99,13 +99,13 @@ func (c *Connection) close() error {
 	return nil
 }
 
-//addRecBytes adds number to count of total recieved bytes
+// addRecBytes adds number to count of total recieved bytes
 func (c *Connection) addRecBytes(n int) { c.br += n }
 
-//readWithContext reads bytes from connection until Terminator or error occurs or context is done.
-//It can be used to read with timeout or any other way to break reader.
+// readWithContext reads bytes from connection until Terminator or error occurs or context is done.
+// It can be used to read with timeout or any other way to break reader.
 //
-//Usual readers are vulnerable to routine-leaks, so this way is more confident.
+// Usual readers are vulnerable to routine-leaks, so this way is more confident.
 func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]byte, int, error) {
 	//Using c.conn.SetReadDeadline(time) in that case will make connection process less flexible.
 	//Instead, checking ctx gives us a way to handle timeouts by the server itself.
@@ -164,7 +164,7 @@ func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]by
 	}
 }
 
-//SendByte sends bytes to remote by writing directrly into connection interface
+// SendByte sends bytes to remote by writing directrly into connection interface
 func (c *Connection) SendByte(b []byte, term byte) (int, error) {
 	b = append(b, term)
 	bs, err := c.conn.Write(b)
@@ -177,5 +177,5 @@ func (c *Connection) SendByte(b []byte, term byte) (int, error) {
 	return bs, nil
 }
 
-//SendString converts s into byte slice and calls to SendByte
+// SendString converts s into byte slice and calls to SendByte
 func (c *Connection) SendString(s string, term byte) (int, error) { return c.SendByte([]byte(s), term) }

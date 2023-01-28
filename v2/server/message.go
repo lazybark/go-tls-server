@@ -1,4 +1,4 @@
-package v1
+package server
 
 //Message represents incoming message with its bytes and pointer to associated connection
 type Message struct {

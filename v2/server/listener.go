@@ -1,11 +1,11 @@
-package v1
+package server
 
 import (
 	"crypto/tls"
 	"fmt"
 )
 
-//Listen runs listener interface implementations and accepts connections
+// Listen runs listener interface implementations and accepts connections
 func (s *Server) Listen(port string) {
 	l, err := tls.Listen("tcp", ":"+port, s.tlsConfig)
 	if err != nil && !s.sConfig.SuppressErrors {
@@ -44,9 +44,9 @@ func (s *Server) Listen(port string) {
 	}
 }
 
-//recieve endlessy reads incoming stream and delivers messages to recievers outside server routine.
-//It uses ReadWithContext, so execution can be manually stopped by calling c.cancel on specific connection.
-//In that case (or if any error occurs) method will trigger s.CloseConnection to break connection too
+// recieve endlessy reads incoming stream and delivers messages to recievers outside server routine.
+// It uses ReadWithContext, so execution can be manually stopped by calling c.cancel on specific connection.
+// In that case (or if any error occurs) method will trigger s.CloseConnection to break connection too
 func (s *Server) recieve(c *Connection) {
 	for {
 		b, n, err := c.readWithContext(s.sConfig.BufferSize, s.sConfig.MaxMessageSize, s.sConfig.MessageTerminator)

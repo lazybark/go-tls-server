@@ -1,11 +1,11 @@
-package v1
+package server
 
 import (
 	"fmt"
 	"time"
 )
 
-//Stat holds server statistic
+// Stat holds server statistic
 type Stat struct {
 	recieved    int
 	sent        int
@@ -13,7 +13,7 @@ type Stat struct {
 	connections int
 }
 
-//Stats returns server stats for specified day or error in case date is not in stat
+// Stats returns server stats for specified day or error in case date is not in stat
 func (s *Server) Stats(y int, m int, d int) (int, int, int, int, error) {
 	date := fmt.Sprintf("%d-%d-%d", y, m, d)
 
@@ -23,7 +23,7 @@ func (s *Server) Stats(y int, m int, d int) (int, int, int, int, error) {
 	return 0, 0, 0, 0, fmt.Errorf("no stat")
 }
 
-//addRecBytes adds bytes to stat of current day
+// addRecBytes adds bytes to stat of current day
 func (s *Server) addRecBytes(n int) {
 	d := fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month(), time.Now().Day())
 	if v, ok := s.Stat[d]; ok {
@@ -34,7 +34,7 @@ func (s *Server) addRecBytes(n int) {
 	}
 }
 
-//addSentBytes adds bytes to stat of current day
+// addSentBytes adds bytes to stat of current day
 func (s *Server) addSentBytes(n int) {
 	d := fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month(), time.Now().Day())
 	if v, ok := s.Stat[d]; ok {
@@ -45,7 +45,7 @@ func (s *Server) addSentBytes(n int) {
 	}
 }
 
-//addErrors adds bytes to stat of current day
+// addErrors adds bytes to stat of current day
 func (s *Server) addErrors(n int) {
 	d := fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month(), time.Now().Day())
 	if v, ok := s.Stat[d]; ok {

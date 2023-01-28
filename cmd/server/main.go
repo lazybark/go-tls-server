@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 
-	v1 "github.com/lazybark/go-tls-server/v1"
+	"github.com/lazybark/go-tls-server/v2/server"
 )
 
 func main() {
-	conf := &v1.Config{KeepOldConnections: 1}
-	s, err := v1.New("localhost", `C:\Users\serge\Desktop\git repos\lazybark\go-tls-server\certs\cert.pem`, `C:\Users\serge\Desktop\git repos\lazybark\go-tls-server\certs\key.pem`, conf)
+	conf := &server.Config{KeepOldConnections: 1}
+	s, err := server.New("localhost", `certs/cert.pem`, `certs/key.pem`, conf)
 	if err != nil {
 		log.Fatal(err)
 	}
