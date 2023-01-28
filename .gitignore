@@ -1,3 +1,4 @@
 
-certs/key.pem
-certs/cert.pem
+cmd/server/certs/key.pem
+cmd/server/certs/cert.pem
+cmd/client/certs/cert.pem
