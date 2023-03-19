@@ -102,7 +102,7 @@ func (c *Connection) close() error {
 // addRecBytes adds number to count of total recieved bytes
 func (c *Connection) addRecBytes(n int) { c.br += n }
 
-// readWithContext reads bytes from connection until Terminator or error occurs or context is done.
+// readWithContext reads bytes from connection until Terminator / error occurs or context is done.
 // It can be used to read with timeout or any other way to break reader.
 //
 // Usual readers are vulnerable to routine-leaks, so this way is more confident.
