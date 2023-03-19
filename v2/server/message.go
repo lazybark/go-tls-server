@@ -13,5 +13,5 @@ func (m *Message) Bytes() []byte { return m.bytes }
 //Length returns message bytes length
 func (m *Message) Length() int { return m.length }
 
-//Length returns message bytes length
+//Conn returns pointer to connection in which message was recieved
 func (m *Message) Conn() *Connection { return m.conn }
