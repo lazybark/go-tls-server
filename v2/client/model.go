@@ -3,9 +3,17 @@ package client
 import (
 	"context"
 	"crypto/tls"
+
+	"github.com/lazybark/go-helpers/semver"
 )
 
-var ver = "1.0.1"
+var ver = semver.Ver{
+	Major:       1,
+	Minor:       0,
+	Patch:       2,
+	Stable:      true,
+	ReleaseNote: "not production tested",
+}
 
 type Client struct {
 	//conn is the connection that will be used to read and write bytes
@@ -105,7 +113,7 @@ func New(conf *Config) *Client {
 }
 
 // Version returns app version
-func (c *Client) Version() string { return ver }
+func (c *Client) Version() semver.Ver { return ver }
 
 // close closes connection and sets internal client vars to stop values
 func (c *Client) close(err bool) error {
