@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	conf := &server.Config{KeepOldConnections: 1}
+	conf := &server.Config{KeepOldConnections: 1, NotifyAboutNewConnections: true}
 	s, err := server.New("localhost", `certs/cert.pem`, `certs/key.pem`, conf)
 	if err != nil {
 		log.Fatal(err)
