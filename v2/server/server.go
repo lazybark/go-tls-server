@@ -11,10 +11,11 @@ import (
 )
 
 var ver = semver.Ver{
-	Major:  2,
-	Minor:  0,
-	Patch:  0,
-	Stable: true,
+	Major:       2,
+	Minor:       0,
+	Patch:       0,
+	Stable:      true,
+	ReleaseNote: "not production tested",
 }
 
 type Server struct {
