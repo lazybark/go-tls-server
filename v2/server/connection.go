@@ -15,38 +15,48 @@ import (
 type Connection struct {
 	//id is an unique string to define connection
 	id string
+
 	//connectedAt time of connection init
 	connectedAt npt.NPT
+
 	//addr is the remote address of client
 	addr net.Addr
+
 	//conn is the connection interface that reads and writes bytes
 	conn net.Conn
+
 	//isClosed = true means that connection was closed and soon will be dropped from pool
 	isClosed bool
 
+	//closedAt is the time connection was marked as 'closed'
 	closedAt npt.NPT
+
 	//lastAct updates every time there was any action in connection
 	lastAct npt.NPT
 
 	//ctx is the connection context
 	ctx    context.Context
 	cancel context.CancelFunc
+
 	//bytesLeft holds extra bytes that were read from stream after terminator occured, but end of buffer was not reached
 	bytesLeft []byte
 
 	//bs holds total bytes sent by server in connection
 	bs int
+
 	//br holds total bytes recieved by server in connection
 	br int
+
 	//errors holds total number of errors occured in connection
 	errors int
 }
 
 func NewConnection(ip net.Addr, conn net.Conn) (*Connection, error) {
+	//Make connection struct
 	c := new(Connection)
 	c.connectedAt = npt.Now()
 	c.lastAct = c.connectedAt
-	//Make connection struct
+
 	id, err := uuid.NewV4()
 	if err != nil {
 		return nil, err

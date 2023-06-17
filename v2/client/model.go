@@ -8,7 +8,7 @@ import (
 )
 
 var ver = semver.Ver{
-	Major:       1,
+	Major:       2,
 	Minor:       0,
 	Patch:       2,
 	Stable:      true,
