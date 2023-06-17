@@ -155,7 +155,7 @@ func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]by
 					return rb, read, nil
 				}
 			}
-			if maxSize > 0 && read >= maxSize {
+			if maxSize > 0 && read > maxSize {
 				c.errors++
 				return nil, read, fmt.Errorf("[ReadWithContext] %w", ErrMessageSizeLimit)
 			}

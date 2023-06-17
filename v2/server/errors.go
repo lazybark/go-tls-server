@@ -3,7 +3,7 @@ package server
 import "errors"
 
 //ErrMessageSizeLimit is returned after message length
-//is equal or over server max message size directive
+//is over server max message size directive
 var ErrMessageSizeLimit = errors.New("message size limits reached")
 
 //ErrReaderClosedByContext is returned after connection was closed

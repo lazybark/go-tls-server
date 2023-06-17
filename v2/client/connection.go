@@ -56,7 +56,7 @@ func (c *Client) ReadWithContext() ([]byte, int, error) {
 					return rb, read, nil
 				}
 			}
-			if c.conf.MaxMessageSize > 0 && read >= c.conf.MaxMessageSize {
+			if c.conf.MaxMessageSize > 0 && read > c.conf.MaxMessageSize {
 				c.errors++
 				return nil, read, fmt.Errorf("[ReadWithContext] message size limits reached")
 			}
