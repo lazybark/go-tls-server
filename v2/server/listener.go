@@ -28,7 +28,7 @@ func (s *Server) Listen(port string) {
 			s.ErrChan <- fmt.Errorf("[Server][Listen] error accepting connection from %v: %w", conn.RemoteAddr(), err)
 		}
 
-		c, err := NewConnection(conn.RemoteAddr(), conn)
+		c, err := NewConnection(conn.RemoteAddr(), conn, s.sConfig.MessageTerminator)
 		if err != nil && !s.sConfig.SuppressErrors {
 			s.ErrChan <- fmt.Errorf("[Server][Listen] error making connection Id for %v: %w", conn.RemoteAddr(), err)
 		}

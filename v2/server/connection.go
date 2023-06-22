@@ -49,9 +49,13 @@ type Connection struct {
 
 	//errors holds total number of errors occured in connection
 	errors int
+
+	//MessageTerminator sets byte value that marks message end in the stream.
+	//Works for both incoming and outgoing messages
+	messageTerminator byte
 }
 
-func NewConnection(ip net.Addr, conn net.Conn) (*Connection, error) {
+func NewConnection(ip net.Addr, conn net.Conn, t byte) (*Connection, error) {
 	//Make connection struct
 	c := new(Connection)
 	c.connectedAt = npt.Now()
@@ -68,6 +72,7 @@ func NewConnection(ip net.Addr, conn net.Conn) (*Connection, error) {
 	c.conn = conn
 	c.cancel = cancel
 	c.ctx = ctx
+	c.SetMessageTerminator(t)
 
 	return c, nil
 
@@ -175,8 +180,8 @@ func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]by
 }
 
 // SendByte sends bytes to remote by writing directrly into connection interface
-func (c *Connection) SendByte(b []byte, term byte) (int, error) {
-	b = append(b, term)
+func (c *Connection) SendByte(b []byte) (int, error) {
+	b = append(b, c.messageTerminator)
 	bs, err := c.conn.Write(b)
 	c.bs += bs
 	c.lastAct.ToNow()
@@ -188,4 +193,7 @@ func (c *Connection) SendByte(b []byte, term byte) (int, error) {
 }
 
 // SendString converts s into byte slice and calls to SendByte
-func (c *Connection) SendString(s string, term byte) (int, error) { return c.SendByte([]byte(s), term) }
+func (c *Connection) SendString(s string) (int, error) { return c.SendByte([]byte(s)) }
+
+// SetMessageTerminator sets byte that will be used as message terminator
+func (c *Connection) SetMessageTerminator(t byte) { c.messageTerminator = t }

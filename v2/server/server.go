@@ -190,7 +190,7 @@ func (s *Server) adminRoutine() {
 
 // SendByte calls to c.SendByte and adds sent bytes to Stat
 func (s *Server) SendByte(c *Connection, b []byte) error {
-	n, err := c.SendByte(b, s.sConfig.MessageTerminator)
+	n, err := c.SendByte(b)
 	s.addSentBytes(n)
 	if err != nil {
 		s.addErrors(1)
@@ -200,7 +200,7 @@ func (s *Server) SendByte(c *Connection, b []byte) error {
 
 // SendString calls to c.SendString and adds sent bytes to Stat
 func (s *Server) SendString(c *Connection, str string) error {
-	n, err := c.SendString(str, s.sConfig.MessageTerminator)
+	n, err := c.SendString(str)
 	s.addSentBytes(n)
 	if err != nil {
 		s.addErrors(1)

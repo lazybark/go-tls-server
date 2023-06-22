@@ -22,7 +22,7 @@ func main() {
 			fmt.Println(conn.Address())
 		case m := <-s.MessageChan:
 			fmt.Println("Got message:", string(m.Bytes()))
-			_, err = m.Conn().SendString("Got ya!", '\n')
+			_, err = m.Conn().SendString("Got ya!")
 			if err != nil {
 				log.Fatal(err)
 			}
