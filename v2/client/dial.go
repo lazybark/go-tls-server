@@ -70,8 +70,10 @@ func (c *Client) Controller() {
 func (c *Client) Reader() {
 	for {
 		b, n, err := c.ReadWithContext()
-		if err != nil && !c.conf.SuppressErrors {
-			c.ErrChan <- fmt.Errorf("[Reader] error reading from %s -> %w", c.host, err)
+		if err != nil {
+			if !c.conf.SuppressErrors {
+				c.ErrChan <- fmt.Errorf("[Reader] error reading from %s -> %w", c.host, err)
+			}
 			return
 		}
 		c.MessageChan <- &Message{length: n, bytes: b}

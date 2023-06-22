@@ -50,8 +50,10 @@ func (s *Server) Listen(port string) {
 func (s *Server) recieve(c *Connection) {
 	for {
 		b, n, err := c.readWithContext(s.sConfig.BufferSize, s.sConfig.MaxMessageSize, s.sConfig.MessageTerminator)
-		if err != nil && !s.sConfig.SuppressErrors {
-			s.ErrChan <- fmt.Errorf("[Server][recieve] error reading from %s: %w", c.id, err)
+		if err != nil {
+			if !s.sConfig.SuppressErrors {
+				s.ErrChan <- fmt.Errorf("[Server][recieve] error reading from %s: %w", c.id, err)
+			}
 			s.CloseConnection(c)
 			return
 		}
