@@ -13,7 +13,7 @@ import (
 var ver = semver.Ver{
 	Major:       2,
 	Minor:       1,
-	Patch:       0,
+	Patch:       2,
 	Stable:      true,
 	ReleaseNote: "not production tested",
 }
