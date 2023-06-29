@@ -57,7 +57,8 @@ type Server struct {
 	MessageChan chan *Message
 
 	//Stat keeps connections stat by date
-	Stat map[string]Stat
+	Stat      map[string]Stat
+	statMutex sync.RWMutex
 }
 
 // New initializes server instance and makes it completely ready to listen for connections
