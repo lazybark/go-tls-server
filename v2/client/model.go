@@ -139,3 +139,6 @@ func (c *Client) RecievedBytes() int { return c.br }
 
 // Stats returns cleint stats
 func (c *Client) SentBytes() int { return c.bs }
+
+// Close stops client and closes connection without error
+func (c *Client) Close() error { return c.close(false) }
