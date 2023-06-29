@@ -104,6 +104,11 @@ func (c *Connection) Closed() bool { return c.isClosed }
 // Id returns connection ID in pool
 func (c *Connection) Id() string { return c.id }
 
+// Close forsibly closes the connection
+func (c *Connection) Close() error {
+	return c.conn.Close()
+}
+
 // close closes the connection with remote and sets isClosed as true
 func (c *Connection) close() error {
 	err := c.conn.Close()
