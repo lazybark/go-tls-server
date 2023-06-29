@@ -1,17 +1,16 @@
-// v2 is deprecated due to some stupid decisions of mine during development.
-// Use v3 instead - it's far more conveniend and easy to use
 package server
 
 import (
 	"crypto/tls"
 	"fmt"
+	"log"
 )
 
 // Listen runs listener interface implementations and accepts connections
 func (s *Server) Listen(port string) {
 	l, err := tls.Listen("tcp", ":"+port, s.tlsConfig)
-	if err != nil && !s.sConfig.SuppressErrors {
-		s.ErrChan <- fmt.Errorf("[Server][Listen] error listening: %w", err)
+	if err != nil {
+		log.Fatal(fmt.Errorf("[Server][Listen] error listening: %w", err))
 	}
 
 	s.listener = l
@@ -60,6 +59,6 @@ func (s *Server) recieve(c *Connection) {
 			return
 		}
 		s.addRecBytes(n)
-		s.MessageChan <- &Message{conn: c, length: n, bytes: b}
+		c.MessageChan <- &Message{conn: c, length: n, bytes: b}
 	}
 }

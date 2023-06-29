@@ -1,5 +1,3 @@
-// v2 is deprecated due to some stupid decisions of mine during development.
-// Use v3 instead - it's far more conveniend and easy to use
 package server
 
 //Message represents incoming message with its bytes and pointer to associated connection

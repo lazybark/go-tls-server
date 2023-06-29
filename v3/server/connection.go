@@ -1,5 +1,3 @@
-// v2 is deprecated due to some stupid decisions of mine during development.
-// Use v3 instead - it's far more conveniend and easy to use
 package server
 
 import (
@@ -55,6 +53,9 @@ type Connection struct {
 	//MessageTerminator sets byte value that marks message end in the stream.
 	//Works for both incoming and outgoing messages
 	messageTerminator byte
+
+	//MessageChan channel to notify external routine about new messages
+	MessageChan chan *Message
 }
 
 func NewConnection(ip net.Addr, conn net.Conn, t byte) (*Connection, error) {
@@ -62,6 +63,7 @@ func NewConnection(ip net.Addr, conn net.Conn, t byte) (*Connection, error) {
 	c := new(Connection)
 	c.connectedAt = npt.Now()
 	c.lastAct = c.connectedAt
+	c.MessageChan = make(chan *Message)
 
 	id, err := uuid.NewV4()
 	if err != nil {

@@ -1,5 +1,3 @@
-// v2 is deprecated due to some stupid decisions of mine during development.
-// Use v3 instead - it's far more conveniend and easy to use
 package server
 
 import (
@@ -13,11 +11,11 @@ import (
 )
 
 var ver = semver.Ver{
-	Major:       2,
-	Minor:       1,
-	Patch:       2,
+	Major:       3,
+	Minor:       0,
+	Patch:       0,
 	Stable:      true,
-	ReleaseNote: "not production tested",
+	ReleaseNote: "beta",
 }
 
 type Server struct {
@@ -55,9 +53,6 @@ type Server struct {
 	//ConnChan is the channel to notify external routine about new connection
 	ConnChan chan *Connection
 
-	//MessageChan channel to notify external routine about new messages
-	MessageChan chan *Message
-
 	//Stat keeps connections stat by date
 	Stat      map[string]Stat
 	statMutex sync.RWMutex
@@ -71,7 +66,6 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	s.ErrChan = make(chan error)
 	s.ServerDoneChan = make(chan bool)
 	s.ConnChan = make(chan *Connection)
-	s.MessageChan = make(chan *Message)
 	s.connPool = make(map[string]*Connection)
 	s.Stat = make(map[string]Stat)
 	s.connPoolMutex = sync.RWMutex{}
