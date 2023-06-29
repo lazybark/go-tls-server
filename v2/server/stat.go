@@ -2,13 +2,11 @@ package server
 
 import (
 	"fmt"
-	"sync"
 	"time"
 )
 
 // Stat holds server statistic
 type Stat struct {
-	m           *sync.RWMutex
 	recieved    int
 	sent        int
 	errors      int
@@ -19,9 +17,9 @@ type Stat struct {
 func (s *Server) Stats(y int, m int, d int) (int, int, int, int, error) {
 	date := fmt.Sprintf("%d-%d-%d", y, m, d)
 
+	s.statMutex.Lock()
+	defer s.statMutex.Unlock()
 	if v, ok := s.Stat[date]; ok {
-		s.Stat[date].m.Lock()
-		defer s.Stat[date].m.Unlock()
 		return v.sent, v.recieved, v.errors, v.connections, nil
 	}
 	return 0, 0, 0, 0, fmt.Errorf("no stat")
@@ -31,13 +29,13 @@ func (s *Server) Stats(y int, m int, d int) (int, int, int, int, error) {
 func (s *Server) addRecBytes(n int) {
 	d := fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month(), time.Now().Day())
 
+	s.statMutex.Lock()
+	defer s.statMutex.Unlock()
 	if v, ok := s.Stat[d]; ok {
-		s.Stat[d].m.Lock()
-		defer s.Stat[d].m.Unlock()
 		v.recieved += n
 		s.Stat[d] = v
 	} else {
-		s.Stat[d] = Stat{recieved: n, m: new(sync.RWMutex)}
+		s.Stat[d] = Stat{recieved: n}
 	}
 
 }
@@ -46,13 +44,13 @@ func (s *Server) addRecBytes(n int) {
 func (s *Server) addSentBytes(n int) {
 	d := fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month(), time.Now().Day())
 
+	s.statMutex.Lock()
+	defer s.statMutex.Unlock()
 	if v, ok := s.Stat[d]; ok {
-		s.Stat[d].m.Lock()
-		defer s.Stat[d].m.Unlock()
 		v.sent += n
 		s.Stat[d] = v
 	} else {
-		s.Stat[d] = Stat{sent: n, m: new(sync.RWMutex)}
+		s.Stat[d] = Stat{sent: n}
 	}
 }
 
@@ -60,12 +58,12 @@ func (s *Server) addSentBytes(n int) {
 func (s *Server) addErrors(n int) {
 	d := fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month(), time.Now().Day())
 
+	s.statMutex.Lock()
+	defer s.statMutex.Unlock()
 	if v, ok := s.Stat[d]; ok {
-		s.Stat[d].m.Lock()
-		defer s.Stat[d].m.Unlock()
 		v.errors += n
 		s.Stat[d] = v
 	} else {
-		s.Stat[d] = Stat{errors: n, m: new(sync.RWMutex)}
+		s.Stat[d] = Stat{errors: n}
 	}
 }
