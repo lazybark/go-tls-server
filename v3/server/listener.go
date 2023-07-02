@@ -50,6 +50,9 @@ func (s *Server) Listen(port string) {
 // In that case (or if any error occurs) method will trigger s.CloseConnection to break connection too
 func (s *Server) recieve(c *Connection) {
 	for {
+		if c.isClosed {
+			return
+		}
 		b, n, err := c.readWithContext(s.sConfig.BufferSize, s.sConfig.MaxMessageSize, s.sConfig.MessageTerminator)
 		if err != nil {
 			if !s.sConfig.SuppressErrors {
