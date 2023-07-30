@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/lazybark/go-tls-server/v2/client"
+	"github.com/lazybark/go-tls-server/v3/client"
 )
 
 func main() {
@@ -17,12 +17,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = c.SendString(ipsum)
+	_, err = c.SendString(ipsum)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = c.SendByte([]byte{'H', 'i', '!'})
+	_, err = c.SendByte([]byte{'H', 'i', '!'})
 	if err != nil {
 		log.Fatal(err)
 	}
