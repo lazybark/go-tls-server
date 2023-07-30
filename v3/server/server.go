@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/lazybark/go-helpers/semver"
+	"github.com/lazybark/go-tls-server/v3/conn"
 )
 
 var ver = semver.Ver{
@@ -30,7 +31,7 @@ type Server struct {
 	//
 	//In this case pointers are used to increase code readability and number of ops
 	//needed to change conn state
-	connPool map[string]*Connection
+	connPool map[string]*conn.Connection
 
 	//connPoolMutex controls connPool
 	connPoolMutex sync.RWMutex
@@ -51,7 +52,7 @@ type Server struct {
 	ServerDoneChan chan bool
 
 	//ConnChan is the channel to notify external routine about new connection
-	ConnChan chan *Connection
+	ConnChan chan *conn.Connection
 
 	//Stat keeps connections stat by date
 	Stat      map[string]Stat
@@ -65,8 +66,8 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	s.host = host
 	s.ErrChan = make(chan error)
 	s.ServerDoneChan = make(chan bool)
-	s.ConnChan = make(chan *Connection)
-	s.connPool = make(map[string]*Connection)
+	s.ConnChan = make(chan *conn.Connection)
+	s.connPool = make(map[string]*conn.Connection)
 	s.Stat = make(map[string]Stat)
 	s.connPoolMutex = sync.RWMutex{}
 	s.ver = ver
@@ -116,7 +117,7 @@ func (s *Server) Online() time.Duration { return time.Since(s.timeStart) }
 func (s *Server) TotalConnetions() int {
 	a := 0
 	for _, c := range s.connPool {
-		if !c.isClosed {
+		if !c.Closed() {
 			a++
 		}
 	}
@@ -131,22 +132,21 @@ func (s *Server) VersionString() string { return s.ver.String() }
 
 // CloseConnection is the only correct way to close connection.
 // It changes conn state in pool and then calls to c.close
-func (s *Server) CloseConnection(c *Connection) error {
-	c.isClosed = true
-	return c.close()
+func (s *Server) CloseConnection(c *conn.Connection) error {
+	return c.Close()
 }
 
 // addToPool adds connection to fool for controlling
-func (s *Server) addToPool(c *Connection) {
+func (s *Server) addToPool(c *conn.Connection) {
 	s.connPoolMutex.Lock()
-	s.connPool[c.id] = c
+	s.connPool[c.Id()] = c
 	s.connPoolMutex.Unlock()
 }
 
 // remFromPool removes connection pointer from pool, so it becomes unavailable to reach
-func (s *Server) remFromPool(c *Connection) {
+func (s *Server) remFromPool(c *conn.Connection) {
 	s.connPoolMutex.Lock()
-	delete(s.connPool, c.id)
+	delete(s.connPool, c.Id())
 	s.connPoolMutex.Unlock()
 }
 
@@ -158,12 +158,12 @@ func (s *Server) adminRoutine() {
 		case <-time.After(time.Hour):
 			for _, c := range s.connPool {
 				//If conn is closed and time now is already after the moment it should be deleted permanently
-				if c.isClosed && !time.Now().Before(c.ClosedAt().Add(time.Minute*time.Duration(s.sConfig.KeepOldConnections))) {
+				if c.Closed() && !time.Now().Before(c.ClosedAt().Add(time.Minute*time.Duration(s.sConfig.KeepOldConnections))) {
 					s.remFromPool(c)
 					continue
 				}
 				//If it's not closed, but it's been a 'KeepInactiveConnections' time after
-				if !c.isClosed && s.sConfig.KeepInactiveConnections > 0 && !time.Now().Before(c.LastAct().Add(time.Minute*time.Duration(s.sConfig.KeepInactiveConnections))) {
+				if !c.Closed() && s.sConfig.KeepInactiveConnections > 0 && !time.Now().Before(c.LastAct().Add(time.Minute*time.Duration(s.sConfig.KeepInactiveConnections))) {
 					s.CloseConnection(c)
 				}
 			}
@@ -177,7 +177,7 @@ func (s *Server) adminRoutine() {
 				for _, c := range s.connPool {
 					err := s.CloseConnection(c)
 					if err != nil && !s.sConfig.SuppressErrors {
-						s.ErrChan <- fmt.Errorf("[Server][adminRoutine] error closing connection %s -> %w", c.id, err)
+						s.ErrChan <- fmt.Errorf("[Server][adminRoutine] error closing connection %s -> %w", c.Id(), err)
 					}
 				}
 			}
@@ -186,7 +186,7 @@ func (s *Server) adminRoutine() {
 }
 
 // SendByte calls to c.SendByte and adds sent bytes to Stat
-func (s *Server) SendByte(c *Connection, b []byte) error {
+func (s *Server) SendByte(c *conn.Connection, b []byte) error {
 	n, err := c.SendByte(b)
 	s.addSentBytes(n)
 	if err != nil {
@@ -196,7 +196,7 @@ func (s *Server) SendByte(c *Connection, b []byte) error {
 }
 
 // SendString calls to c.SendString and adds sent bytes to Stat
-func (s *Server) SendString(c *Connection, str string) error {
+func (s *Server) SendString(c *conn.Connection, str string) error {
 	n, err := c.SendString(str)
 	s.addSentBytes(n)
 	if err != nil {

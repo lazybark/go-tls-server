@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"log"
+
+	"github.com/lazybark/go-tls-server/v3/conn"
 )
 
 // Listen runs listener interface implementations and accepts connections
@@ -24,14 +26,14 @@ func (s *Server) Listen(port string) {
 
 	for {
 		//Accept the connection
-		conn, err := l.Accept()
+		tlsConn, err := l.Accept()
 		if err != nil && !s.sConfig.SuppressErrors {
-			s.ErrChan <- fmt.Errorf("[Server][Listen] error accepting connection from %v: %w", conn.RemoteAddr(), err)
+			s.ErrChan <- fmt.Errorf("[Server][Listen] error accepting connection from %v: %w", tlsConn.RemoteAddr(), err)
 		}
 
-		c, err := NewConnection(conn.RemoteAddr(), conn, s.sConfig.MessageTerminator)
+		c, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, s.sConfig.MessageTerminator)
 		if err != nil && !s.sConfig.SuppressErrors {
-			s.ErrChan <- fmt.Errorf("[Server][Listen] error making connection Id for %v: %w", conn.RemoteAddr(), err)
+			s.ErrChan <- fmt.Errorf("[Server][Listen] error making connection for %v: %w", tlsConn.RemoteAddr(), err)
 		}
 
 		//Add to pool
@@ -48,15 +50,15 @@ func (s *Server) Listen(port string) {
 // recieve endlessy reads incoming stream and delivers messages to recievers outside server routine.
 // It uses ReadWithContext, so execution can be manually stopped by calling c.cancel on specific connection.
 // In that case (or if any error occurs) method will trigger s.CloseConnection to break connection too
-func (s *Server) recieve(c *Connection) {
+func (s *Server) recieve(c *conn.Connection) {
 	for {
-		if c.isClosed {
+		if c.Closed() {
 			return
 		}
-		b, n, err := c.readWithContext(s.sConfig.BufferSize, s.sConfig.MaxMessageSize, s.sConfig.MessageTerminator)
+		b, n, err := c.ReadWithContext(s.sConfig.BufferSize, s.sConfig.MaxMessageSize, s.sConfig.MessageTerminator)
 		if err != nil {
 			if !s.sConfig.SuppressErrors {
-				s.ErrChan <- fmt.Errorf("[Server][recieve] error reading from %s: %w", c.id, err)
+				s.ErrChan <- fmt.Errorf("[Server][recieve] error reading from %s: %w", c.Id(), err)
 			}
 			s.CloseConnection(c)
 			return

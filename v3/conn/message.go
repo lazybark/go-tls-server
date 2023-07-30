@@ -1,10 +1,14 @@
-package server
+package conn
 
 //Message represents incoming message with its bytes and pointer to associated connection
 type Message struct {
 	conn   *Connection
 	length int
 	bytes  []byte
+}
+
+func NewMessage(conn *Connection, length int, bytes []byte) *Message {
+	return &Message{conn: conn, length: length, bytes: bytes}
 }
 
 //Bytes returns message bytes

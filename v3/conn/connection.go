@@ -1,10 +1,11 @@
-package server
+package conn
 
 import (
 	"context"
 	"fmt"
 	"io"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -23,7 +24,7 @@ type Connection struct {
 	addr net.Addr
 
 	//conn is the connection interface that reads and writes bytes
-	conn net.Conn
+	tlsConn net.Conn
 
 	//isClosed = true means that connection was closed and soon will be dropped from pool
 	isClosed bool
@@ -56,6 +57,8 @@ type Connection struct {
 
 	//MessageChan channel to notify external routine about new messages
 	MessageChan chan *Message
+
+	mu *sync.RWMutex
 }
 
 func NewConnection(ip net.Addr, conn net.Conn, t byte) (*Connection, error) {
@@ -64,6 +67,7 @@ func NewConnection(ip net.Addr, conn net.Conn, t byte) (*Connection, error) {
 	c.connectedAt = npt.Now()
 	c.lastAct = c.connectedAt
 	c.MessageChan = make(chan *Message)
+	c.mu = &sync.RWMutex{}
 
 	id, err := uuid.NewV4()
 	if err != nil {
@@ -73,7 +77,7 @@ func NewConnection(ip net.Addr, conn net.Conn, t byte) (*Connection, error) {
 
 	c.id = id.String()
 	c.addr = ip
-	c.conn = conn
+	c.tlsConn = conn
 	c.cancel = cancel
 	c.ctx = ctx
 	c.SetMessageTerminator(t)
@@ -110,14 +114,27 @@ func (c *Connection) Id() string { return c.id }
 
 // Close forsibly closes the connection
 func (c *Connection) Close() error {
-	return c.conn.Close()
+	c.isClosed = true
+	return c.tlsConn.Close()
+}
+
+// Stats returns Connection stats
+func (c *Connection) Stats() (int, int, int) { return c.bs, c.br, c.errors }
+
+// DropOldStats sets bytes recieved, sent and error count to zero
+func (c *Connection) DropOldStats() {
+	c.mu.Lock()
+	c.br = 0
+	c.bs = 0
+	c.errors = 0
+	c.mu.Unlock()
 }
 
 // close closes the connection with remote and sets isClosed as true
 func (c *Connection) close() error {
-	err := c.conn.Close()
+	err := c.tlsConn.Close()
 	if err != nil {
-		return fmt.Errorf("[Connection][Close] error: %w", err)
+		return fmt.Errorf("[Connection][close] %w", err)
 	}
 	c.isClosed = true
 	return nil
@@ -128,9 +145,12 @@ func (c *Connection) addRecBytes(n int) { c.br += n }
 
 // readWithContext reads bytes from connection until Terminator / error occurs or context is done.
 // It can be used to read with timeout or any other way to break reader.
-//
 // Usual readers are vulnerable to routine-leaks, so this way is more confident.
-func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]byte, int, error) {
+//
+// IMPORTANT: if EOF or context deadline appear, readWithContext will mark connection as 'closed'.
+// Other errors should be treated manually by external code.
+// In all cases method will return last bytes read
+func (c *Connection) ReadWithContext(buffer, maxSize int, terminator byte) ([]byte, int, error) {
 	//Using c.conn.SetReadDeadline(time) in that case will make connection process less flexible.
 	//Instead, checking ctx gives us a way to handle timeouts by the server itself.
 	//We can, for example, close connection after some inactivity period by checking c.lastAct
@@ -150,18 +170,22 @@ func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]by
 		select {
 		case <-c.ctx.Done():
 			// Break by context
-			return nil, read, fmt.Errorf("[ReadWithContext] %w", ErrReaderClosedByContext)
+			c.close()
+			return nil, read, nil
 		default:
-			n, err := c.conn.Read(b)
+			n, err := c.tlsConn.Read(b)
 			if err != nil {
 				c.errors++
 				if err == io.EOF {
 					c.close()
-					return nil, read, fmt.Errorf("[ReadWithContext] %s", ErrStreamClosed)
+					return nil, read, fmt.Errorf("[ReadWithContext] %w", ErrStreamClosed)
 				}
 				if c.ctx.Done() != nil {
-					return nil, read, fmt.Errorf("[ReadWithContext] %w", ErrReaderClosedByContext)
+					c.close()
+					return nil, read, nil
 				}
+				//The connecton is not closed yet in this case!
+				//Client code should decide if they want to close or try to read next bytes
 				return nil, read, fmt.Errorf("[ReadWithContext] reading error: %w", err)
 			}
 			read += n
@@ -172,7 +196,7 @@ func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]by
 					rb = append(rb, b[:num]...)
 					//We collect extra bytes in case there is something left from prev message and pass on to next one
 					//This can happen in cases when client sends data in a stream-way, not portionally
-					//These bytes will be picked up with next trigger of reader
+					//These bytes will be picked up with next trigger of reader as if they were sent with next message itself
 					if len(b[num:n]) > 0 {
 						c.bytesLeft = b[num:n]
 					}
@@ -191,7 +215,7 @@ func (c *Connection) readWithContext(buffer, maxSize int, terminator byte) ([]by
 // SendByte sends bytes to remote by writing directrly into connection interface
 func (c *Connection) SendByte(b []byte) (int, error) {
 	b = append(b, c.messageTerminator)
-	bs, err := c.conn.Write(b)
+	bs, err := c.tlsConn.Write(b)
 	c.bs += bs
 	c.lastAct.ToNow()
 	if err != nil {
