@@ -61,7 +61,11 @@ func (s *Server) recieve(c *Connection) {
 			s.CloseConnection(c)
 			return
 		}
-		s.addRecBytes(n)
-		c.MessageChan <- &Message{conn: c, length: n, bytes: b}
+
+		//Check in case we read 0 bytes
+		if n > 0 {
+			s.addRecBytes(n)
+			c.MessageChan <- conn.NewMessage(c, n, b)
+		}
 	}
 }
