@@ -14,7 +14,7 @@ import (
 var ver = semver.Ver{
 	Major:       3,
 	Minor:       0,
-	Patch:       0,
+	Patch:       2,
 	Stable:      true,
 	ReleaseNote: "beta",
 }
