@@ -30,6 +30,8 @@ func (c *Client) DialTo(address string, port int, cert string) error {
 	if err != nil {
 		return fmt.Errorf("[Client] unable to dial to %s:%d: %w", address, port, err)
 	}
+
+	//We reset data in case client was used before
 	c.connCount++
 	c.isClosed = false
 	c.isClosedWithError = false
