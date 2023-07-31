@@ -112,18 +112,19 @@ func (c *Connection) Closed() bool { return c.isClosed }
 // Id returns connection ID in pool
 func (c *Connection) Id() string { return c.id }
 
-// Close forsibly closes the connection.
+// Close forsibly closes the connection. Active reader may still return bytes read between message start and connection close.
 //
 // IMPORTANT: 'close_notify' exchange is built on lower logic levels, but attempt to read/write with closed connection
 // is still possible and will return error. If there is a risk that your app may do so, then you may need to use
 // some flags to mark closed connections and avoid possible errors.
 func (c *Connection) Close() error {
 	c.isClosed = true
+	c.cancel()
 	return c.tlsConn.Close()
 }
 
 // Stats returns Connection stats
-func (c *Connection) Stats() (int, int, int) { return c.bs, c.br, c.errors }
+func (c *Connection) Stats() (sent, received, errors int) { return c.bs, c.br, c.errors }
 
 // DropOldStats sets bytes recieved, sent and error count to zero
 func (c *Connection) DropOldStats() {
@@ -147,7 +148,7 @@ func (c *Connection) close() error {
 }
 
 // addRecBytes adds number to count of total recieved bytes
-func (c *Connection) addRecBytes(n int) { c.br += n }
+func (c *Connection) addRecBytes(n *int) { c.br += *n }
 
 // readWithContext reads bytes from connection until Terminator / error occurs or context is done.
 // It can be used to read with timeout or any other way to break reader.
@@ -169,7 +170,7 @@ func (c *Connection) ReadWithContext(buffer, maxSize int, terminator byte) ([]by
 	}
 	//Length of current read
 	read := 0
-	defer c.addRecBytes(read)
+	defer c.addRecBytes(&read)
 	//Read buffer with server-defined size
 	b := make([]byte, buffer)
 	for {
