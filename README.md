@@ -1,3 +1,2 @@
 # go-tls-server
-
-More info at [my site](https://lazybark.dev/go-tls-client-server).
+[![Test](https://github.com/lazybark/go-tls-server/actions/workflows/test.yml/badge.svg)](https://github.com/lazybark/go-tls-server/actions/workflows/test.yml)
