@@ -109,9 +109,7 @@ func (c *Client) Version() semver.Ver { return ver }
 
 // close closes connection and sets internal client vars to stop values
 func (c *Client) close(err bool) error {
-	if err {
-		c.isClosedWithError = true
-	}
+	c.isClosedWithError = err
 	c.Cancel()
 	c.isClosed = true
 	return c.conn.Close()
