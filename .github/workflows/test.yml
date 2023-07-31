@@ -1,4 +1,4 @@
-name: Build and Test
+name: Test
 on:
   push:
     branches: [ "main" ]
@@ -12,11 +12,5 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
       
-      - name: Build Server
-        run: go build cmd/server .
-        
-      - name: Build Client
-        run: go build cmd/client .
-        
       - name: Test
         run: go test -v ./...
