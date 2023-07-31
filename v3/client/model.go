@@ -8,9 +8,9 @@ import (
 )
 
 var ver = semver.Ver{
-	Major:       2,
+	Major:       3,
 	Minor:       0,
-	Patch:       2,
+	Patch:       1,
 	Stable:      true,
 	ReleaseNote: "not production tested",
 }
