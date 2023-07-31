@@ -118,9 +118,7 @@ func (c *Connection) Id() string { return c.id }
 // is still possible and will return error. If there is a risk that your app may do so, then you may need to use
 // some flags to mark closed connections and avoid possible errors.
 func (c *Connection) Close() error {
-	c.isClosed = true
-	c.cancel()
-	return c.tlsConn.Close()
+	return c.close()
 }
 
 // Stats returns Connection stats
@@ -137,6 +135,7 @@ func (c *Connection) DropOldStats() {
 
 // close closes the connection with remote
 func (c *Connection) close() error {
+	c.cancel()
 	err := c.tlsConn.Close()
 	if err != nil {
 		return fmt.Errorf("[Connection][close] %w", err)
@@ -177,20 +176,17 @@ func (c *Connection) ReadWithContext(buffer, maxSize int, terminator byte) ([]by
 		select {
 		case <-c.ctx.Done():
 			// Break by context
-			c.close()
 			return nil, read, nil
 		default:
 			n, err := c.tlsConn.Read(b)
 			if err != nil {
-				c.errors++
 				if err == io.EOF {
-					c.close()
 					return nil, read, fmt.Errorf("[ReadWithContext] %w", ErrStreamClosed)
 				}
 				if c.ctx.Done() != nil {
-					c.close()
 					return nil, read, nil
 				}
+				c.errors++
 				//The connecton is not closed yet in this case!
 				//Client code should decide if they want to close or try to read next bytes
 				return nil, read, fmt.Errorf("[ReadWithContext] reading error: %w", err)
