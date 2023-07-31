@@ -197,6 +197,11 @@ func (c *Connection) ReadWithContext(buffer, maxSize int, terminator byte) ([]by
 			}
 			read += n
 			c.lastAct.ToNow()
+
+			if maxSize > 0 && read > maxSize {
+				c.errors++
+				return nil, read, fmt.Errorf("[ReadWithContext] %w (read %v of max %v)", ErrMessageSizeLimit, read, maxSize)
+			}
 			//We check every byte searching for terminator
 			for num, by := range b[:n] {
 				if by == terminator {
@@ -210,10 +215,7 @@ func (c *Connection) ReadWithContext(buffer, maxSize int, terminator byte) ([]by
 					return rb, read, nil
 				}
 			}
-			if maxSize > 0 && read > maxSize {
-				c.errors++
-				return nil, read, fmt.Errorf("[ReadWithContext] %w (read %v of max %v)", ErrMessageSizeLimit, read, maxSize)
-			}
+
 			rb = append(rb, b[:n]...)
 		}
 	}
