@@ -112,7 +112,11 @@ func (c *Connection) Closed() bool { return c.isClosed }
 // Id returns connection ID in pool
 func (c *Connection) Id() string { return c.id }
 
-// Close forsibly closes the connection
+// Close forsibly closes the connection.
+//
+// IMPORTANT: 'close_notify' exchange is built on lower logic levels, but attempt to read/write with closed connection
+// is still possible and will return error. If there is a risk that your app may do so, then you may need to use
+// some flags to mark closed connections and avoid possible errors.
 func (c *Connection) Close() error {
 	c.isClosed = true
 	return c.tlsConn.Close()
@@ -130,13 +134,15 @@ func (c *Connection) DropOldStats() {
 	c.mu.Unlock()
 }
 
-// close closes the connection with remote and sets isClosed as true
+// close closes the connection with remote
 func (c *Connection) close() error {
 	err := c.tlsConn.Close()
 	if err != nil {
 		return fmt.Errorf("[Connection][close] %w", err)
 	}
 	c.isClosed = true
+	c.closedAt = npt.Now()
+
 	return nil
 }
 
