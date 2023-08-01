@@ -26,7 +26,7 @@ Client parameters:
 Server manages connections by deleting old & inactive from connPool. So when you use similar connection pool in your project (to store client-related data), you might need to check if the connection is still active. Server stores pointers and deletes them after some period of time, but if your app stores pointers to server connections, then you will not notice the fact that connection was removed from server. It will still be accessible and if it has been closed, you will encounter an error when trying write/read. The best way to check if connection is still usable is to call Connection.Closed().
 
 ### Statistic
-Both client and server have stats than can be useful. 
+Both client and server have stats that can be useful. 
 
 Server has:
 * Stats(year int, month int, day int) - will return number of bytes sent/received + number of errors or an ErrNoStatForTheDay 
