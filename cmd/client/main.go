@@ -12,6 +12,21 @@ func main() {
 	conf := client.Config{SuppressErrors: false, MessageTerminator: '\n'}
 	c := client.New(&conf)
 
+	done := make(chan bool)
+
+	go func() {
+		for err := range c.ErrChan {
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
+		for m := range c.MessageChan {
+			fmt.Println("Got message:", string(m.Bytes()))
+		}
+		done <- true
+	}()
+
 	err := c.DialTo("localhost", 5555, `certs/cert.pem`)
 	if err != nil {
 		log.Fatal(err)
@@ -27,12 +42,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for {
-		select {
-		case err := <-c.ErrChan:
-			fmt.Println(err)
-		case m := <-c.MessageChan:
-			fmt.Println("Got message:", string(m.Bytes()))
-		}
-	}
+	<-done
 }
