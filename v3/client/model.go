@@ -75,10 +75,16 @@ func (c *Client) close(withError bool) error {
 	return nil
 }
 
-// Close stops client and closes connection without error
+// Close stops client and closes connection without error.
+//
+// Important: it does not close the message & error channels as there still might be some leftovers got by client.
+// You may want to close them manually if your app design needs it
 func (c *Client) Close() error { return c.close(false) }
 
-// Close stops client and closes connection WITH error
+// Close stops client and closes connection WITH error.
+//
+// Important: it does not close the message & error channels as there still might be some leftoverss got by client.
+// You may want to close them manually if your app design needs it
 func (c *Client) CloseWithError() error { return c.close(true) }
 
 // Closed returns true if client was closed
