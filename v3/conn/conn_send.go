@@ -6,12 +6,16 @@ import "fmt"
 func (c *Connection) SendByte(b []byte) (int, error) {
 	b = append(b, c.messageTerminator)
 	bs, err := c.tlsConn.Write(b)
-	c.bs += bs
-	c.lastAct.ToNow()
+
+	c.addSentBytes(bs)
+	c.setLastAct()
+
 	if err != nil {
-		c.errors++
+		c.addErrors(1)
+
 		return bs, fmt.Errorf("[SendByte] error writing response: %w", err)
 	}
+
 	return bs, nil
 }
 
