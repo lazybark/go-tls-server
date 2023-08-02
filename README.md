@@ -5,15 +5,15 @@ go-tls-server is a small lib to create client-server apps using tls.Conn. It use
 
 A practical example of how it works you can find in [go-cloud-sync](https://github.com/lazybark/go-cloud-sync).
 
-Cert & key for server & **Client** can be generated via [go-cert-generator](https://github.com/lazybark/go-cert-generator).
+Cert & key for **Server** & **Client** can be generated via [go-cert-generator](https://github.com/lazybark/go-cert-generator).
 
-Server parameters:
-* SuppressErrors (bool) - prevents server from sending errors into ErrChan
+**Server** parameters:
+* SuppressErrors (bool) - prevents **Server** from sending errors into ErrChan
 * MaxMessageSize (int) - sets max length of one message in bytes
 * MessageTerminator (byte) - sets byte value that marks message end of the message in stream
 * BufferSize (int) - regulates buffer length to read incoming message
-* KeepOldConnections (int) - prevents server from dropping closed connection for N minutes after it has been closed
-* KeepInactiveConnections (int) - makes server close connection that had no activity for N mins
+* KeepOldConnections (int) - prevents **Server** from dropping closed connection for N minutes after it has been closed
+* KeepInactiveConnections (int) - makes **Server** close connection that had no activity for N mins
 
 **Client** parameters:
 * SuppressErrors (bool) - prevents **Client** from sending errors into ErrChan
@@ -23,7 +23,7 @@ Server parameters:
 * DropOldStats (bool) - make **Client** to set all sent/recieved bytes & errors to zero before opening new connection
 
 ### Control connections
-Server manages connections by deleting old & inactive from connPool. So when you use similar connection pool in your project (to store client-related data), you might need to check if the connection is still active. Server stores pointers and deletes them after some period of time, but if your app stores pointers to server connections, then you will not notice the fact that connection was removed from server. It will still be accessible and if it has been closed, you will encounter an error when trying write/read. The best way to check if connection is still usable is to call Connection.Closed().
+**Server** manages connections by deleting old & inactive from connPool. So when you use similar connection pool in your project (to store client-related data), you might need to check if the connection is still active. **Server** stores pointers and deletes them after some period of time, but if your app stores pointers to **Server** connections, then you will not notice the fact that connection was removed from **Server**. It will still be accessible and if it has been closed, you will encounter an error when trying write/read. The best way to check if connection is still usable is to call Connection.Closed().
 
 **Client** connection is closed by calling Client.Close() or by sending 'true' into Client.ClientDoneChan. Second method will trigger Client.Close() from **Client's** internal admin routine. This method exists for flexibility of external apps that will use **Client**.
 
@@ -42,23 +42,23 @@ Reading is just an extracting bytes from Connection with Reader interface. When 
 Important: message & close channels of  **Client** are not closed when Client.Close() called. It's made by design to keep  **Client** code simple, because there may still be some messages received or errors produced at the moment of Close() call. That's why you can still receive messages that were read from TLS connection before it was closed.
 
 ### Statistic
-Both  **Client** and server have stats that can be useful. 
+Both  **Client** and **Server** have stats that can be useful. 
 
-Server has:
+**Server** has:
 * Stats(year int, month int, day int) - will return number of bytes sent/received + number of errors or an ErrNoStatForTheDay 
 * StatsConnections() - will simply return current number of connections in pool
 * ActiveConnetions() - total number of currently active (usable) connections
-* Online() - how long the server is online
+* Online() - how long the **Server** is online
 
  **Client** has:
 * Stats() - will return number of bytes sent/received + number of errors
 
 ## Basic usage
-Basic usage is to use **Server** & **Client** behind an interface or as part of bigger struct. Both return new connections and messages via channels to external calling code which means you can create routines to process new connections and messages in them (as server) or to create separate connections and communicate with server (as **Client**).
+Basic usage is to use **Server** & **Client** behind an interface or as part of bigger struct. Both return new connections and messages via channels to external calling code which means you can create routines to process new connections and messages in them (as **Server**) or to create separate connections and communicate with **Server** (as **Client**).
 
 So you just run a routine that awaits in connection channel and does some magic when new connection appears. Best way here is to add connection to your internal pool (if you need to manage it with some extra data) and then run goroutine that awaits & processes messages via connection message channel.
 
-### Simple server code
+### Simple Server code
 
 ```
 package main
@@ -152,7 +152,7 @@ func main() {
 ## Complex usage
 
 ### Server
-As an example of using the server in bigger project, you can create struct that holds config for server:
+As an example of using the **Server** in bigger project, you can create struct that holds config for **Server**:
 ```
 package server
 
@@ -225,9 +225,9 @@ func (s *LinkServer) Listen(addr, port string) error {
 	return nil
 }
 ```
-Now your server can already accept connections. LinkServer struct can be then put into bigger struct that controls your app.
+Now your **Server** can already accept connections. LinkServer struct can be then put into bigger struct that controls your app.
 
-Same goes for client. You create some struct with parameters and client field in it.
+Same goes for **Client**. You create some struct with parameters and client field in it.
 ```
 package client
 
@@ -295,7 +295,7 @@ func (sc *LinkClient) Close() error {
 }
 
 ```
-And use ending struct in your client app. For example: to wait and process one single response from server, you can create such method:
+And use ending struct in your client app. For example: to wait and process one single response from **Server**, you can create such method:
 ```
 package client
 
