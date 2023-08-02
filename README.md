@@ -5,7 +5,7 @@ go-tls-server is a small lib to create client-server apps using tls.Conn. It use
 
 A practical example of how it works you can find in [go-cloud-sync](https://github.com/lazybark/go-cloud-sync).
 
-Cert & key for server & client can be generated via [go-cert-generator](https://github.com/lazybark/go-cert-generator).
+Cert & key for server & **Client** can be generated via [go-cert-generator](https://github.com/lazybark/go-cert-generator).
 
 Server parameters:
 * SuppressErrors (bool) - prevents server from sending errors into ErrChan
@@ -15,18 +15,34 @@ Server parameters:
 * KeepOldConnections (int) - prevents server from dropping closed connection for N minutes after it has been closed
 * KeepInactiveConnections (int) - makes server close connection that had no activity for N mins
 
-Client parameters:
-* SuppressErrors (bool) - prevents client from sending errors into ErrChan
+**Client** parameters:
+* SuppressErrors (bool) - prevents **Client** from sending errors into ErrChan
 * MaxMessageSize (int) - sets max length of one message in bytes
 * MessageTerminator (byte) - sets byte value that marks message end of the message in stream
 * BufferSize (int) - regulates buffer length to read incoming message
-* DropOldStats (bool) - make client to set all sent/recieved bytes & errors to zero before opening new connection
+* DropOldStats (bool) - make **Client** to set all sent/recieved bytes & errors to zero before opening new connection
 
 ### Control connections
 Server manages connections by deleting old & inactive from connPool. So when you use similar connection pool in your project (to store client-related data), you might need to check if the connection is still active. Server stores pointers and deletes them after some period of time, but if your app stores pointers to server connections, then you will not notice the fact that connection was removed from server. It will still be accessible and if it has been closed, you will encounter an error when trying write/read. The best way to check if connection is still usable is to call Connection.Closed().
 
+**Client** connection is closed by calling Client.Close() or by sending 'true' into Client.ClientDoneChan. Second method will trigger Client.Close() from **Client's** internal admin routine. This method exists for flexibility of external apps that will use **Client**.
+
+Important note: connections in this package are not guaranteed to be routine-safe. A single connection is not made to write/read data in concurrent way. If you wish to process messages with many routines, they should be called or receive data from channel in single routine that reads from connection exclusively. Making connection thread-safe will take extra resources to cover external app design problems and make process of transferring complex data structures (as files) become much harder.
+
+In this case, if you need some routine to block the reading for itself, you can call for { Connection.ReadWithContext } in this routine and release after some conditions were met. For example, if you want to read file parts after **Client** signals about sending them. This way you will know exactly what to read and when to release.
+
+And if you need to send many files at once - use new connection for each one or for batch of N files.
+
+So basic rule: each connection has exactly one controlling routine that orchestrates writing and reading process.
+
+
+### Reading
+Reading is just an extracting bytes from Connection with Reader interface. When :robot: byte appears, the message returned to calling code. But, if message had bytes after :robot:, then rest of them will be saved for next reading and added at the start of next message. This is a useful feature in case your peer sends several messages at once, but may lead to sudden bugs with some values of reading buffer & max message size. So it's better to send exactly as much bytes as you want to be in one message.
+
+Important: message & close channels of  **Client** are not closed when Client.Close() called. It's made by design to keep  **Client** code simple, because there may still be some messages received or errors produced at the moment of Close() call. That's why you can still receive messages that were read from TLS connection before it was closed.
+
 ### Statistic
-Both client and server have stats that can be useful. 
+Both  **Client** and server have stats that can be useful. 
 
 Server has:
 * Stats(year int, month int, day int) - will return number of bytes sent/received + number of errors or an ErrNoStatForTheDay 
@@ -34,11 +50,11 @@ Server has:
 * ActiveConnetions() - total number of currently active (usable) connections
 * Online() - how long the server is online
 
-Client has:
+ **Client** has:
 * Stats() - will return number of bytes sent/received + number of errors
 
 ## Basic usage
-Basic usage is to use server & client behind an interface or as part of bigger struct. Both return new connections and messages via channels to external calling code which means you can create routines to process new connections and messages in them (as server) or to create separate connections and communicate with server (as client).
+Basic usage is to use **Server** & **Client** behind an interface or as part of bigger struct. Both return new connections and messages via channels to external calling code which means you can create routines to process new connections and messages in them (as server) or to create separate connections and communicate with server (as **Client**).
 
 So you just run a routine that awaits in connection channel and does some magic when new connection appears. Best way here is to add connection to your internal pool (if you need to manage it with some extra data) and then run goroutine that awaits & processes messages via connection message channel.
 
@@ -98,6 +114,21 @@ func main() {
 	conf := client.Config{SuppressErrors: false, MessageTerminator: '\n'}
 	c := client.New(&conf)
 
+	done := make(chan bool)
+
+	go func() {
+		for err := range c.ErrChan {
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
+		for m := range c.MessageChan {
+			fmt.Println("Got message:", string(m.Bytes()))
+		}
+		done <- true
+	}()
+
 	err := c.DialTo("localhost", 5555, `certs/cert.pem`)
 	if err != nil {
 		log.Fatal(err)
@@ -113,15 +144,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for {
-		select {
-		case err := <-c.ErrChan:
-			fmt.Println(err)
-		case m := <-c.MessageChan:
-			fmt.Println("Got message:", string(m.Bytes()))
-		}
-	}
+	<-done
 }
+
 ```
 
 ## Complex usage
