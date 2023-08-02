@@ -1,18 +1,11 @@
 package client
 
-// Controller stops client in case stop signal recieved
+// Controller stops client in case stop signal recieved via ClientDoneChan
 func (c *Client) Controller() {
-	for {
-		select {
-		case d := <-c.ClientDoneChan:
-			if d {
-				c.close(false)
-				return
-			}
-		case <-c.ctx.Done():
+	for d := range c.ClientDoneChan {
+		if d {
 			c.close(false)
 			return
 		}
-
 	}
 }

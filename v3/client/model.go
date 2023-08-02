@@ -1,8 +1,6 @@
 package client
 
 import (
-	"context"
-
 	"github.com/lazybark/go-helpers/semver"
 	"github.com/lazybark/go-tls-server/v3/conn"
 )
@@ -38,7 +36,8 @@ type Client struct {
 	//ErrChan is the channel to send errors into external routine
 	ErrChan chan error
 
-	//ClientDoneChan is the channel to recieve client stopping command
+	//ClientDoneChan is the channel to recieve client stopping command from external routine.
+	//It's not used by default and exist to provide flexibility for bigger apps that will use client
 	ClientDoneChan chan bool
 
 	//MessageChan channel to notify external routine about new messages
@@ -46,10 +45,6 @@ type Client struct {
 
 	//connCount holds total number of successfull conections of the client
 	connCount int
-
-	//ctx is the connection context
-	ctx    context.Context
-	Cancel context.CancelFunc
 }
 
 // Stats returns number of bytes sent/receive + number of errors
@@ -61,7 +56,6 @@ func (c *Client) Version() semver.Ver { return ver }
 // close closes connection and sets internal client vars to stop values
 func (c *Client) close(withError bool) error {
 	c.isClosedWithError = withError
-	c.Cancel()
 	c.isClosed = true
 	return c.conn.Close()
 }

@@ -1,8 +1,6 @@
 package client
 
 import (
-	"context"
-
 	"github.com/lazybark/go-tls-server/v3/conn"
 )
 
@@ -12,10 +10,6 @@ func New(conf *Config) *Client {
 	c.ErrChan = make(chan error)
 	c.ClientDoneChan = make(chan bool)
 	c.MessageChan = make(chan *conn.Message)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	c.Cancel = cancel
-	c.ctx = ctx
 
 	if conf == nil {
 		conf = &Config{}
