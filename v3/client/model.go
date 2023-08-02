@@ -10,9 +10,9 @@ import (
 var ver = semver.Ver{
 	Major:       3,
 	Minor:       0,
-	Patch:       1,
-	Stable:      true,
-	ReleaseNote: "not production tested",
+	Patch:       2,
+	Stable:      false,
+	ReleaseNote: "beta",
 }
 
 // Client is the TLS client managing one single connection & statistics.
@@ -52,64 +52,15 @@ type Client struct {
 	Cancel context.CancelFunc
 }
 
-type Config struct {
-	//SuppressErrors prevents client from sending errors into ErrChan.
-	//Does not include fatal errors during startup.
-	SuppressErrors bool
-
-	//MaxMessageSize sets max length of one message in bytes.
-	//If >0 and limit is reached, connection will be closed with an error.
-	//
-	//Note that if MaxMessageSize is > than reading buffer and MaxMessageSize reached,
-	//it will not close connection until buffer is full or message terminator occurs.
-	MaxMessageSize int
-
-	//MessageTerminator sets byte value that marks end of the message in stream.
-	//Works for both incoming and outgoing messages
-	MessageTerminator byte
-
-	//BufferSize regulates buffer length to read incoming message. Default value is 128
-	BufferSize int
-
-	//DropOldStats = true will make client to set all sent/recieved bytes & errors to zero before opening new connection
-	DropOldStats bool
-}
-
-// New creates new Client with specified config or default parameters
-func New(conf *Config) *Client {
-	c := new(Client)
-	c.ErrChan = make(chan error)
-	c.ClientDoneChan = make(chan bool)
-	c.MessageChan = make(chan *conn.Message)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	c.Cancel = cancel
-	c.ctx = ctx
-
-	if conf == nil {
-		conf = &Config{}
-		//Dropping all stats is the default behaviour
-		conf.DropOldStats = true
-	}
-	//Default terminator is the newline
-	if conf.MessageTerminator == 0 {
-		conf.MessageTerminator = '\n'
-	}
-	//Default buffer is 128 B
-	if conf.BufferSize == 0 {
-		conf.BufferSize = 128
-	}
-	c.conf = conf
-
-	return c
-}
+// Stats returns number of bytes sent/receive + number of errors
+func (c *Client) Stats() (sent, received, errors int) { return c.conn.Stats() }
 
 // Version returns app version
 func (c *Client) Version() semver.Ver { return ver }
 
 // close closes connection and sets internal client vars to stop values
-func (c *Client) close(err bool) error {
-	c.isClosedWithError = err
+func (c *Client) close(withError bool) error {
+	c.isClosedWithError = withError
 	c.Cancel()
 	c.isClosed = true
 	return c.conn.Close()
@@ -118,4 +69,11 @@ func (c *Client) close(err bool) error {
 // Close stops client and closes connection without error
 func (c *Client) Close() error { return c.close(false) }
 
-func (c *Client) Stats() (sent, received, errors int) { return c.conn.Stats() }
+// Close stops client and closes connection WITH error
+func (c *Client) CloseWithError() error { return c.close(true) }
+
+// Closed returns true if client was closed
+func (c *Client) Closed() bool { return c.isClosed }
+
+// ClosedWithError returns true if client was closed with error
+func (c *Client) ClosedWithError() bool { return c.isClosedWithError }

@@ -14,7 +14,7 @@ var ver = semver.Ver{
 	Major:       3,
 	Minor:       0,
 	Patch:       2,
-	Stable:      true,
+	Stable:      false,
 	ReleaseNote: "beta",
 }
 
