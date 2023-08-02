@@ -53,7 +53,7 @@ type Client struct {
 }
 
 type Config struct {
-	//SuppressErrors stops client from sending errors into ErrChan.
+	//SuppressErrors prevents client from sending errors into ErrChan.
 	//Does not include fatal errors during startup.
 	SuppressErrors bool
 
@@ -64,7 +64,7 @@ type Config struct {
 	//it will not close connection until buffer is full or message terminator occurs.
 	MaxMessageSize int
 
-	//MessageTerminator sets byte value that marks message end in the stream.
+	//MessageTerminator sets byte value that marks end of the message in stream.
 	//Works for both incoming and outgoing messages
 	MessageTerminator byte
 
@@ -117,3 +117,5 @@ func (c *Client) close(err bool) error {
 
 // Close stops client and closes connection without error
 func (c *Client) Close() error { return c.close(false) }
+
+func (c *Client) Stats() (sent, received, errors int) { return c.conn.Stats() }
