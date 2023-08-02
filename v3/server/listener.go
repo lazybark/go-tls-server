@@ -39,9 +39,7 @@ func (s *Server) Listen(port string) {
 		//Add to pool
 		s.addToPool(c)
 		//Notify outer routine
-		if s.sConfig.NotifyAboutNewConnections {
-			s.ConnChan <- c
-		}
+		s.ConnChan <- c
 		//Wait for new messages
 		go s.recieve(c)
 	}

@@ -1,7 +1,7 @@
 package server
 
 type Config struct {
-	//SuppressErrors stops server from sending errors into ErrChan.
+	//SuppressErrors prevents server from sending errors into ErrChan.
 	//Does not include fatal errors during startup.
 	SuppressErrors bool
 
@@ -12,7 +12,7 @@ type Config struct {
 	//it will not close connection until buffer is full or message terminator occurs.
 	MaxMessageSize int
 
-	//MessageTerminator sets byte value that marks message end in the stream.
+	//MessageTerminator sets byte value that marks end of the message in stream.
 	//Works for both incoming and outgoing messages
 	MessageTerminator byte
 
@@ -28,7 +28,4 @@ type Config struct {
 	//KeepInactiveConnections makes server close connection that had no activity for N mins.
 	//0 means keep such connection forever
 	KeepInactiveConnections int
-
-	//NotifyAboutNewConnections tells server to notify external routine about every new connections
-	NotifyAboutNewConnections bool
 }
