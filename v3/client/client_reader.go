@@ -9,7 +9,7 @@ import (
 // Reader infinitely reads messages from opened connection
 func (c *Client) reader() {
 	for {
-		if c.conn.Closed() {
+		if c.conn.Closed() || c.Closed() {
 			return
 		}
 		b, n, err := c.conn.ReadWithContext(c.conf.BufferSize, c.conf.MaxMessageSize, c.conf.MessageTerminator)
