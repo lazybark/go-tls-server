@@ -1,6 +1,8 @@
 package client
 
 import (
+	"sync"
+
 	"github.com/lazybark/go-tls-server/v3/conn"
 )
 
@@ -10,6 +12,7 @@ func New(conf *Config) *Client {
 	c.ErrChan = make(chan error, 3)
 	c.ClientDoneChan = make(chan bool)
 	c.MessageChan = make(chan *conn.Message, 10)
+	c.mu = &sync.RWMutex{}
 
 	if conf == nil {
 		conf = &Config{}

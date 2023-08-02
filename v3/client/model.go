@@ -1,6 +1,9 @@
 package client
 
 import (
+	"fmt"
+	"sync"
+
 	"github.com/lazybark/go-helpers/semver"
 	"github.com/lazybark/go-tls-server/v3/conn"
 )
@@ -45,6 +48,10 @@ type Client struct {
 
 	//connCount holds total number of successfull conections of the client
 	connCount int
+
+	//mu is used to set client closed to state. It's not protecting stat variables which means
+	//reading and/or writing should not be done concurrently
+	mu *sync.RWMutex
 }
 
 // Stats returns number of bytes sent/receive + number of errors
@@ -55,9 +62,17 @@ func (c *Client) Version() semver.Ver { return ver }
 
 // close closes connection and sets internal client vars to stop values
 func (c *Client) close(withError bool) error {
+	c.mu.Lock()
 	c.isClosedWithError = withError
 	c.isClosed = true
-	return c.conn.Close()
+	c.mu.Unlock()
+
+	err := c.conn.Close()
+	if err != nil {
+		return fmt.Errorf("[close] %w", err)
+	}
+
+	return nil
 }
 
 // Close stops client and closes connection without error
@@ -67,7 +82,19 @@ func (c *Client) Close() error { return c.close(false) }
 func (c *Client) CloseWithError() error { return c.close(true) }
 
 // Closed returns true if client was closed
-func (c *Client) Closed() bool { return c.isClosed }
+func (c *Client) Closed() (cl bool) {
+	c.mu.RLock()
+	cl = c.isClosed
+	c.mu.RUnlock()
+
+	return cl
+}
 
 // ClosedWithError returns true if client was closed with error
-func (c *Client) ClosedWithError() bool { return c.isClosedWithError }
+func (c *Client) ClosedWithError() (cl bool) {
+	c.mu.RLock()
+	cl = c.isClosedWithError
+	c.mu.RUnlock()
+
+	return
+}
