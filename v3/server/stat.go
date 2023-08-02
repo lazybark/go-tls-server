@@ -14,7 +14,12 @@ type Stat struct {
 
 var ErrNoStatForTheDay = fmt.Errorf("no stat")
 
-const statKeyPattern = "%d-%d-%d"
+const statKeyPattern string = "%d-%d-%d"
+
+func getStatKey() string {
+	now := time.Now()
+	return fmt.Sprintf(statKeyPattern, now.Year(), now.Month(), now.Day())
+}
 
 // Stats returns server stats for specified day or error in case date is not in stat
 func (s *Server) Stats(y int, m int, d int) (sentBytes, recievedBytes, errors int, err error) {
@@ -92,7 +97,19 @@ func (s *Server) addErrors(n int) {
 	}
 }
 
-func getStatKey() string {
-	now := time.Now()
-	return fmt.Sprintf(statKeyPattern, now.Year(), now.Month(), now.Day())
+// StartedAt returns starting time
+func (s *Server) StartedAt() time.Time { return s.timeStart }
+
+// Online returns time online
+func (s *Server) Online() time.Duration { return time.Since(s.timeStart) }
+
+// ActiveConnetions returns number of active connections
+func (s *Server) ActiveConnetions() int {
+	a := 0
+	for _, c := range s.connPool {
+		if !c.Closed() {
+			a++
+		}
+	}
+	return a
 }

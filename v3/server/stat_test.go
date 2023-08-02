@@ -2,7 +2,6 @@ package server
 
 import (
 	"errors"
-	"sync"
 	"testing"
 	"time"
 
@@ -10,21 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func GetEmptyTestServer() *Server {
-	s := new(Server)
-	s.timeStart = time.Now()
-	s.host = "localhost"
-	s.ErrChan = make(chan error)
-	s.ServerDoneChan = make(chan bool)
-	s.ConnChan = make(chan *conn.Connection)
-	s.connPool = make(map[string]*conn.Connection)
-	s.Stat = make(map[string]Stat)
-	s.connPoolMutex = sync.RWMutex{}
-	s.ver = ver
-
-	return s
-}
 
 func TestStatistic(t *testing.T) {
 	srv := GetEmptyTestServer()
