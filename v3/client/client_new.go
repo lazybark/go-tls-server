@@ -7,9 +7,9 @@ import (
 // New creates new Client with specified config or default parameters
 func New(conf *Config) *Client {
 	c := new(Client)
-	c.ErrChan = make(chan error)
+	c.ErrChan = make(chan error, 3)
 	c.ClientDoneChan = make(chan bool)
-	c.MessageChan = make(chan *conn.Message)
+	c.MessageChan = make(chan *conn.Message, 10)
 
 	if conf == nil {
 		conf = &Config{}
