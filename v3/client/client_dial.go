@@ -49,8 +49,8 @@ func (c *Client) DialTo(address string, port int, cert string) error {
 	}
 	c.conn = cn
 
-	go c.Controller()
-	go c.Reader()
+	go c.controller()
+	go c.reader()
 
 	return nil
 }

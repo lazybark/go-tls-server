@@ -7,7 +7,7 @@ import (
 )
 
 // Reader infinitely reads messages from opened connection
-func (c *Client) Reader() {
+func (c *Client) reader() {
 	for {
 		if c.conn.Closed() {
 			return
