@@ -129,13 +129,12 @@ func TestConnectionReadingClosedByContext(t *testing.T) {
 	var read []byte
 	var count int
 
-	go func(read *[]byte, count *int, err *error) {
-		*read, *count, *err = cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
-	}(&read, &count, &err)
+	go func() {
+		time.Sleep(time.Second * 3)
+		cn.cancel()
+	}()
 
-	time.Sleep(time.Second * 3)
-	cn.cancel()
-
+	read, count, err = cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
 	assert.Equal(t, nil, err)
 
 	assert.Equal(t, len(tlsConn.BytesToRead), count) //It still returns count of bytes read
@@ -160,13 +159,12 @@ func TestConnectionReadingClose(t *testing.T) {
 	var read []byte
 	var count int
 
-	go func(read *[]byte, count *int, err *error) {
-		*read, *count, *err = cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
-	}(&read, &count, &err)
+	go func() {
+		time.Sleep(time.Second * 3)
+		cn.Close()
+	}()
 
-	time.Sleep(time.Second * 3)
-	cn.Close()
-
+	read, count, err = cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
 	assert.Equal(t, nil, err)
 
 	assert.Equal(t, len(tlsConn.BytesToRead), count) //It still returns count of bytes read
