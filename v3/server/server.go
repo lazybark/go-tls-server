@@ -114,7 +114,7 @@ func (s *Server) StartedAt() time.Time { return s.timeStart }
 func (s *Server) Online() time.Duration { return time.Since(s.timeStart) }
 
 // ActiveConnetions returns number of active connections
-func (s *Server) TotalConnetions() int {
+func (s *Server) ActiveConnetions() int {
 	a := 0
 	for _, c := range s.connPool {
 		if !c.Closed() {
