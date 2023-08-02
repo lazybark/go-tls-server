@@ -25,7 +25,7 @@ func (c *Connection) ReadWithContext(buffer, maxSize int, terminator byte) ([]by
 	}
 	//Length of current read
 	read := 0
-	defer c.addRecBytes(read)
+	defer func(read *int) { c.addRecBytes(*read) }(&read)
 	//Read buffer with server-defined size
 	b := make([]byte, buffer)
 	for {
