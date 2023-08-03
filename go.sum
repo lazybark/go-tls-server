@@ -4,8 +4,13 @@ github.com/gofrs/uuid v4.2.0+incompatible h1:yyYWMnhkhrKwwr8gAOcOCYxOOscHgDS9yZg
 github.com/gofrs/uuid v4.2.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=
 github.com/lazybark/go-helpers v1.3.0 h1:x6kS0km/6IxkW3Xa7hh0/Hisvfpt31r3uT2r2+a492g=
 github.com/lazybark/go-helpers v1.3.0/go.mod h1:bMwDjPrCvWWa4ZfyFA2EdoG4p7b3HElnG7wZ68N9Aq4=
+github.com/lazybark/go-helpers v1.7.0 h1:XkQ78ZHpKYXRi9QMs+oPD8z69OBURycymD0IAvlxK1Q=
+github.com/lazybark/go-helpers v1.7.0/go.mod h1:P18drDopDj36LSqGW8JkedG43IC+ABY5ciyH4AM3usU=
+github.com/lazybark/go-helpers v1.7.1-0.20230803183936-acec329f1010 h1:eur7ftdXdQC2kI/j4XpG++bEx53m/myS3AaCj/IQhq8=
+github.com/lazybark/go-helpers v1.7.1-0.20230803183936-acec329f1010/go.mod h1:P18drDopDj36LSqGW8JkedG43IC+ABY5ciyH4AM3usU=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=

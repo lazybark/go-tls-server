@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/lazybark/go-helpers/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -15,7 +16,7 @@ var (
 
 func TestConnectionCorrectByteSending(t *testing.T) {
 	send := "Hello there, General Kenobi!"
-	tlsConn := &MockTLSConnection{}
+	tlsConn := &mock.MockTLSConnection{}
 
 	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
@@ -31,7 +32,7 @@ func TestConnectionCorrectByteSending(t *testing.T) {
 
 func TestConnectionCorrectStringSending(t *testing.T) {
 	send := "Hello there, General Kenobi!"
-	tlsConn := &MockTLSConnection{}
+	tlsConn := &mock.MockTLSConnection{}
 
 	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
@@ -46,7 +47,7 @@ func TestConnectionCorrectStringSending(t *testing.T) {
 }
 
 func TestConnectionCorrectReading(t *testing.T) {
-	tlsConn := &MockTLSConnection{
+	tlsConn := &mock.MockTLSConnection{
 		BytesToRead: []byte("Hello there, General Kenobi!\n"),
 	}
 
@@ -69,7 +70,7 @@ func TestConnectionCorrectReading(t *testing.T) {
 }
 
 func TestConnectionReadingTooLargeMessage(t *testing.T) {
-	tlsConn := &MockTLSConnection{
+	tlsConn := &mock.MockTLSConnection{
 		BytesToRead: []byte("Hello there, General Kenobi!\n"),
 	}
 
@@ -93,7 +94,7 @@ func TestConnectionReadingTooLargeMessage(t *testing.T) {
 }
 
 func TestConnectionReadingTooLargeMessageTooLargeBuffer(t *testing.T) {
-	tlsConn := &MockTLSConnection{
+	tlsConn := &mock.MockTLSConnection{
 		BytesToRead: []byte("Hello there, General Kenobi!\n"),
 	}
 
@@ -117,7 +118,7 @@ func TestConnectionReadingTooLargeMessageTooLargeBuffer(t *testing.T) {
 }
 
 func TestConnectionReadingClosedByContext(t *testing.T) {
-	tlsConn := &MockTLSConnection{
+	tlsConn := &mock.MockTLSConnection{
 		BytesToRead: []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
 	}
 
@@ -147,7 +148,7 @@ func TestConnectionReadingClosedByContext(t *testing.T) {
 }
 
 func TestConnectionReadingClose(t *testing.T) {
-	tlsConn := &MockTLSConnection{
+	tlsConn := &mock.MockTLSConnection{
 		BytesToRead: []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
 	}
 
@@ -181,7 +182,7 @@ func TestConnectionReadingClose(t *testing.T) {
 }
 
 func TestConnectionReadingEOF(t *testing.T) {
-	tlsConn := &MockTLSConnection{
+	tlsConn := &mock.MockTLSConnection{
 		BytesToRead: []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
 		ReturnEOF:   true,
 	}
@@ -205,7 +206,7 @@ func TestConnectionReadingEOF(t *testing.T) {
 }
 
 func TestConnectionReadingStats(t *testing.T) {
-	tlsConn := &MockTLSConnection{
+	tlsConn := &mock.MockTLSConnection{
 		BytesToRead: []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
 	}
 
