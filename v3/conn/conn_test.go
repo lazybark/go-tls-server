@@ -22,7 +22,7 @@ func TestConnectionCorrectByteSending(t *testing.T) {
 	require.NoError(t, err)
 
 	cn.SendByte([]byte(send))
-	assert.Equal(t, send+testMessageTerminator, string(tlsConn.WriteBytesTo))
+	assert.Equal(t, send+testMessageTerminator, string(tlsConn.MWR.Bytes))
 
 	sent, rec, errs := cn.Stats()
 	assert.Equal(t, len(send+testMessageTerminator), sent)
@@ -38,7 +38,7 @@ func TestConnectionCorrectStringSending(t *testing.T) {
 	require.NoError(t, err)
 
 	cn.SendString(send)
-	assert.Equal(t, send+testMessageTerminator, string(tlsConn.WriteBytesTo))
+	assert.Equal(t, send+testMessageTerminator, string(tlsConn.MWR.Bytes))
 
 	sent, rec, errs := cn.Stats()
 	assert.Equal(t, len(send+testMessageTerminator), sent)
@@ -48,7 +48,10 @@ func TestConnectionCorrectStringSending(t *testing.T) {
 
 func TestConnectionCorrectReading(t *testing.T) {
 	tlsConn := &mock.MockTLSConnection{
-		BytesToRead: []byte("Hello there, General Kenobi!\n"),
+		MWR: mock.MockWriteReader{
+			Bytes:            []byte("Hello there, General Kenobi!\n"),
+			DontReturEOFEver: true, //To mock endless stream with opened client
+		},
 	}
 
 	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
@@ -59,11 +62,11 @@ func TestConnectionCorrectReading(t *testing.T) {
 	read, count, err := cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
 	require.NoError(t, err)
 
-	assert.Equal(t, string(tlsConn.BytesToRead[:len(tlsConn.BytesToRead)-1]), string(read))
-	assert.Equal(t, len(tlsConn.BytesToRead), count)
+	assert.Equal(t, string(tlsConn.MWR.Bytes[:len(tlsConn.MWR.Bytes)-1]), string(read))
+	assert.Equal(t, len(tlsConn.MWR.Bytes), count)
 
 	sent, rec, errs := cn.Stats()
-	assert.Equal(t, len(tlsConn.BytesToRead), rec)
+	assert.Equal(t, len(tlsConn.MWR.Bytes), rec)
 	assert.Equal(t, 0, errs)
 	assert.Equal(t, 0, sent)
 
@@ -71,7 +74,10 @@ func TestConnectionCorrectReading(t *testing.T) {
 
 func TestConnectionReadingTooLargeMessage(t *testing.T) {
 	tlsConn := &mock.MockTLSConnection{
-		BytesToRead: []byte("Hello there, General Kenobi!\n"),
+		MWR: mock.MockWriteReader{
+			Bytes:            []byte("Hello there, General Kenobi!\n"),
+			DontReturEOFEver: true, //To mock endless stream with opened client
+		},
 	}
 
 	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
@@ -95,7 +101,10 @@ func TestConnectionReadingTooLargeMessage(t *testing.T) {
 
 func TestConnectionReadingTooLargeMessageTooLargeBuffer(t *testing.T) {
 	tlsConn := &mock.MockTLSConnection{
-		BytesToRead: []byte("Hello there, General Kenobi!\n"),
+		MWR: mock.MockWriteReader{
+			Bytes:            []byte("Hello there, General Kenobi!\n"),
+			DontReturEOFEver: true, //To mock endless stream with opened client
+		},
 	}
 
 	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
@@ -107,19 +116,22 @@ func TestConnectionReadingTooLargeMessageTooLargeBuffer(t *testing.T) {
 	read, count, err := cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
 	assert.Equal(t, true, errors.Is(err, ErrMessageSizeLimit))
 
-	assert.Equal(t, "", string(read))                //Returning nothing
-	assert.Equal(t, len(tlsConn.BytesToRead), count) //Larger buffer reads whole message before there is an error
+	assert.Equal(t, "", string(read))              //Returning nothing
+	assert.Equal(t, len(tlsConn.MWR.Bytes), count) //Larger buffer reads whole message before there is an error
 
 	sent, rec, errs := cn.Stats()
-	assert.Equal(t, len(tlsConn.BytesToRead), rec) //Larger buffer reads whole message before there is an error
-	assert.Equal(t, 1, errs)                       //Got exactly 1 error
+	assert.Equal(t, len(tlsConn.MWR.Bytes), rec) //Larger buffer reads whole message before there is an error
+	assert.Equal(t, 1, errs)                     //Got exactly 1 error
 	assert.Equal(t, 0, sent)
 
 }
 
 func TestConnectionReadingClosedByContext(t *testing.T) {
 	tlsConn := &mock.MockTLSConnection{
-		BytesToRead: []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
+		MWR: mock.MockWriteReader{
+			Bytes:            []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
+			DontReturEOFEver: true,                                   //To mock endless stream with opened client
+		},
 	}
 
 	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
@@ -138,18 +150,21 @@ func TestConnectionReadingClosedByContext(t *testing.T) {
 	read, count, err = cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
 	assert.Equal(t, nil, err)
 
-	assert.Equal(t, len(tlsConn.BytesToRead), count) //It still returns count of bytes read
-	assert.Equal(t, "", string(read))                //But not the data
+	assert.Equal(t, len(tlsConn.MWR.Bytes), count) //It still returns count of bytes read
+	assert.Equal(t, "", string(read))              //But not the data
 
 	sent, rec, errs := cn.Stats()
-	assert.Equal(t, len(tlsConn.BytesToRead), rec) //It still returns count of bytes read
-	assert.Equal(t, 0, errs)                       //Errors 0, as there was no error itself, just stopped by externall call
+	assert.Equal(t, len(tlsConn.MWR.Bytes), rec) //It still returns count of bytes read
+	assert.Equal(t, 0, errs)                     //Errors 0, as there was no error itself, just stopped by externall call
 	assert.Equal(t, 0, sent)
 }
 
 func TestConnectionReadingClose(t *testing.T) {
 	tlsConn := &mock.MockTLSConnection{
-		BytesToRead: []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
+		MWR: mock.MockWriteReader{
+			Bytes:            []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
+			DontReturEOFEver: true,                                   //To mock endless stream with opened client
+		},
 	}
 
 	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
@@ -168,12 +183,12 @@ func TestConnectionReadingClose(t *testing.T) {
 	read, count, err = cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
 	assert.Equal(t, nil, err)
 
-	assert.Equal(t, len(tlsConn.BytesToRead), count) //It still returns count of bytes read
-	assert.Equal(t, "", string(read))                //But not the data
+	assert.Equal(t, len(tlsConn.MWR.Bytes), count) //It still returns count of bytes read
+	assert.Equal(t, "", string(read))              //But not the data
 
 	sent, rec, errs := cn.Stats()
-	assert.Equal(t, len(tlsConn.BytesToRead), rec) //It still returns count of bytes read
-	assert.Equal(t, 0, errs)                       //Errors 0, as there was no error itself, just stopped by externall call
+	assert.Equal(t, len(tlsConn.MWR.Bytes), rec) //It still returns count of bytes read
+	assert.Equal(t, 0, errs)                     //Errors 0, as there was no error itself, just stopped by externall call
 	assert.Equal(t, 0, sent)
 
 	assert.Equal(t, true, cn.isClosed)
@@ -183,8 +198,10 @@ func TestConnectionReadingClose(t *testing.T) {
 
 func TestConnectionReadingEOF(t *testing.T) {
 	tlsConn := &mock.MockTLSConnection{
-		BytesToRead: []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
-		ReturnEOF:   true,
+		MWR: mock.MockWriteReader{
+			Bytes:     []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
+			ReturnEOF: true,
+		},
 	}
 
 	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
@@ -207,7 +224,10 @@ func TestConnectionReadingEOF(t *testing.T) {
 
 func TestConnectionReadingStats(t *testing.T) {
 	tlsConn := &mock.MockTLSConnection{
-		BytesToRead: []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
+		MWR: mock.MockWriteReader{
+			Bytes:            []byte("Hello there, General Kenobi!"), //No terminator, so it will go until stopped
+			DontReturEOFEver: true,                                   //To mock endless stream with opened client
+		},
 	}
 
 	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
