@@ -5,7 +5,7 @@ go-tls-server is a small lib to create client-server apps using tls.Conn. It use
 
 A practical example of how it works you can find in [go-cloud-sync](https://github.com/lazybark/go-cloud-sync).
 
-Connection benchmarks are located at [v3/conn/conn_bench_test.go](https://github.com/lazybark/go-tls-server/blob/main/v3/conn/conn_bench_test.go)
+Connection benchmarks are located at [v3/conn/conn_bench_test.go](https://github.com/lazybark/go-tls-server/blob/main/v3/conn/conn_bench_test.go). They're done via mock TLS connection and w/r ops are performed in memory. But it's still a good place to compare with other solutions.
 
 Cert & key for **Server** & **Client** can be generated via [go-cert-generator](https://github.com/lazybark/go-cert-generator).
 
