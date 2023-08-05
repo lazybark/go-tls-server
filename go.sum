@@ -6,6 +6,8 @@ github.com/lazybark/go-helpers v1.7.1-0.20230804152901-1cd734325847 h1:nXPYY6WQS
 github.com/lazybark/go-helpers v1.7.1-0.20230804152901-1cd734325847/go.mod h1:P18drDopDj36LSqGW8JkedG43IC+ABY5ciyH4AM3usU=
 github.com/lazybark/go-helpers v1.7.1-0.20230804155734-8fd62c2b7866 h1:YpNr8AjzGO0pZaLWyqI5Z+5vr36Hk4FmrKf71g0Mk1Q=
 github.com/lazybark/go-helpers v1.7.1-0.20230804155734-8fd62c2b7866/go.mod h1:P18drDopDj36LSqGW8JkedG43IC+ABY5ciyH4AM3usU=
+github.com/lazybark/go-helpers v1.7.1-0.20230805135405-11a0594095ec h1:/BHE2bRU/fpWmcaqjieRS7tX3AnqHsq7e+hRdskOp4E=
+github.com/lazybark/go-helpers v1.7.1-0.20230805135405-11a0594095ec/go.mod h1:P18drDopDj36LSqGW8JkedG43IC+ABY5ciyH4AM3usU=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=

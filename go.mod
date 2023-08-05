@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/gofrs/uuid v4.2.0+incompatible
-	github.com/lazybark/go-helpers v1.7.1-0.20230804155734-8fd62c2b7866
+	github.com/lazybark/go-helpers v1.7.1-0.20230805135405-11a0594095ec
 	github.com/stretchr/testify v1.8.4
 )
 
