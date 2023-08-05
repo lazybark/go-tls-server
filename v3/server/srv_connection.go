@@ -29,6 +29,7 @@ func (s *Server) SendByte(c *conn.Connection, b []byte) error {
 	if err != nil {
 		s.addErrors(1)
 	}
+
 	return err
 }
 
@@ -39,5 +40,6 @@ func (s *Server) SendString(c *conn.Connection, str string) error {
 	if err != nil {
 		s.addErrors(1)
 	}
+
 	return err
 }
