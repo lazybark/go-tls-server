@@ -25,7 +25,7 @@ func TestConnectionCorrectByteSending(t *testing.T) {
 	assert.Equal(t, send+testMessageTerminator, string(tlsConn.MWR.Bytes))
 
 	sent, rec, errs := cn.Stats()
-	assert.Equal(t, len(send+testMessageTerminator), sent)
+	assert.Equal(t, len(send+testMessageTerminator), sent) //Sending bytes, so counting also bytes, not chars
 	assert.Equal(t, 0, errs)
 	assert.Equal(t, 0, rec)
 }
@@ -41,7 +41,7 @@ func TestConnectionCorrectStringSending(t *testing.T) {
 	assert.Equal(t, send+testMessageTerminator, string(tlsConn.MWR.Bytes))
 
 	sent, rec, errs := cn.Stats()
-	assert.Equal(t, len(send+testMessageTerminator), sent)
+	assert.Equal(t, len(send+testMessageTerminator), sent) //Sending bytes, so counting also bytes, not chars
 	assert.Equal(t, 0, errs)
 	assert.Equal(t, 0, rec)
 }
