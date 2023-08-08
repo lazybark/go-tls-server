@@ -8,6 +8,12 @@ import (
 	"github.com/lazybark/go-helpers/mock"
 )
 
+var (
+	readWithContextBenchmarkResult []byte
+	sendByteBenchmarkResult        int
+	sendStringBenchmarkResult      int
+)
+
 func FailTest(b *testing.B, err error) {
 	if err != nil {
 		b.Error(err)
@@ -30,7 +36,7 @@ func BenchmarkConnectionCorrectReading(b *testing.B) {
 			b.Run(fmt.Sprintf("size_%d_buffer_%d", n, bl), func(b *testing.B) {
 				tlsConn.MWR.Bytes = []byte(gen.GenerateRandomString(n))
 				for i := 0; i < b.N; i++ {
-					cn.ReadWithContext(bl, maxSize, testMessageTerminator[0])
+					readWithContextBenchmarkResult, _, _ = cn.ReadWithContext(bl, maxSize, testMessageTerminator[0])
 
 					tlsConn.MWR.SetLastRead(0)
 				}
@@ -55,7 +61,7 @@ func BenchmarkConnectionCorrectByteSending(b *testing.B) {
 		//Sending bytes, so counting also bytes, not chars
 		b.Run(fmt.Sprintf("input_size_%d", len(str)), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				cn.SendByte([]byte(str))
+				sendByteBenchmarkResult, _ = cn.SendByte([]byte(str))
 			}
 		})
 	}
@@ -77,7 +83,7 @@ func BenchmarkConnectionCorrectStringSending(b *testing.B) {
 		//Sending bytes, so counting also bytes, not chars
 		b.Run(fmt.Sprintf("input_size_%d", len(str)), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				cn.SendString(str)
+				sendStringBenchmarkResult, _ = cn.SendString(str)
 			}
 		})
 	}
