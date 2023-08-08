@@ -10,19 +10,19 @@ Connection benchmarks are located at [v3/conn/conn_bench_test.go](https://github
 Cert & key for **Server** & **Client** can be generated via [go-cert-generator](https://github.com/lazybark/go-cert-generator).
 
 **Server** parameters:
-* SuppressErrors (bool) - prevents **Server** from sending errors into ErrChan
-* MaxMessageSize (int) - sets max length of one message in bytes
-* MessageTerminator (byte) - sets byte value that marks message end of the message in stream
-* BufferSize (int) - regulates buffer length to read incoming message
-* KeepOldConnections (int) - prevents **Server** from dropping closed connection for N minutes after it has been closed
-* KeepInactiveConnections (int) - makes **Server** close connection that had no activity for N mins
+* `SuppressErrors (bool)` - prevents **Server** from sending errors into `ErrChan`
+* `MaxMessageSize (int)` - sets max length of one message in bytes
+* `MessageTerminator (byte)` - sets byte value that marks message end of the message in stream
+* `BufferSize (int)` - regulates buffer length to read incoming message
+* `KeepOldConnections (int)` - prevents **Server** from dropping closed connection for N minutes after it has been closed
+* `KeepInactiveConnections (int)` - makes **Server** close connection that had no activity for N mins
 
 **Client** parameters:
-* SuppressErrors (bool) - prevents **Client** from sending errors into ErrChan
-* MaxMessageSize (int) - sets max length of one message in bytes
-* MessageTerminator (byte) - sets byte value that marks message end of the message in stream
-* BufferSize (int) - regulates buffer length to read incoming message
-* DropOldStats (bool) - make **Client** to set all sent/recieved bytes & errors to zero before opening new connection
+* `SuppressErrors (bool)` - prevents **Client** from sending errors into `ErrChan`
+* `MaxMessageSize (int)` - sets max length of one message in bytes
+* `MessageTerminator (byte)` - sets byte value that marks message end of the message in stream
+* `BufferSize (int)` - regulates buffer length to read incoming message
+* `DropOldStats (bool)` - make **Client** to set all sent/recieved bytes & errors to zero before opening new connection
 
 ### Control connections
 **Server** manages connections by deleting old & inactive from connPool. So when you use similar connection pool in your project (to store client-related data), you might need to check if the connection is still active. **Server** stores pointers and deletes them after some period of time, but if your app stores pointers to **Server** connections, then you will not notice the fact that connection was removed from **Server**. It will still be accessible and if it has been closed, you will encounter an error when trying write/read. The best way to check if connection is still usable is to call Connection.Closed().
@@ -47,10 +47,10 @@ Important: message & close channels of  **Client** are not closed when Client.Cl
 Both  **Client** and **Server** have stats that can be useful. 
 
 **Server** has:
-* Stats(year int, month int, day int) - will return number of bytes sent/received + number of errors or an ErrNoStatForTheDay 
-* StatsConnections() - will simply return current number of connections in pool
-* ActiveConnetions() - total number of currently active (usable) connections
-* Online() - how long the **Server** is online
+* `Stats(year int, month int, day int)` - will return number of bytes sent/received + number of errors or an `ErrNoStatForTheDay`
+* `StatsConnections()` - will simply return current number of connections in pool
+* `ActiveConnetions()` - total number of currently active (usable) connections
+* `Online()` - how long the **Server** is online
 
  **Client** has:
 * Stats() - will return number of bytes sent/received + number of errors
