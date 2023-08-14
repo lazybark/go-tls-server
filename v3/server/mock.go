@@ -16,6 +16,7 @@ func GetEmptyTestServer() *Server {
 	s.ConnChan = make(chan *conn.Connection)
 	s.connPool = make(map[string]*conn.Connection)
 	s.stat = make(map[string]Stat)
+	s.statOverall = &Stat{}
 	s.connPoolMutex = sync.RWMutex{}
 	s.ver = ver
 
