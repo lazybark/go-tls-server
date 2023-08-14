@@ -22,16 +22,31 @@ func getStatKey() string {
 }
 
 // Stats returns server stats for specified day or error in case date is not in stat
+func (s *Server) StatsOverall() (sentBytes, recievedBytes, errors int, err error) {
+	//Right now err is not used - added for compatibility for future
+
+	s.statMutex.Lock()
+	defer s.statMutex.Unlock()
+
+	sentBytes = s.statOverall.sent
+	recievedBytes = s.statOverall.recieved
+	errors = s.statOverall.errors
+
+	return
+}
+
+// Stats returns server stats for specified day or error in case date is not in stat
 func (s *Server) Stats(y int, m int, d int) (sentBytes, recievedBytes, errors int, err error) {
 	date := fmt.Sprintf(statKeyPattern, y, m, d)
 
 	s.statMutex.Lock()
 	defer s.statMutex.Unlock()
-	if v, ok := s.Stat[date]; ok {
+	if v, ok := s.stat[date]; ok {
 		return v.sent, v.recieved, v.errors, nil
 	}
 
 	err = ErrNoStatForTheDay
+
 	return
 }
 
@@ -54,12 +69,14 @@ func (s *Server) addRecBytes(n int) {
 
 	s.statMutex.Lock()
 	defer s.statMutex.Unlock()
-	if v, ok := s.Stat[d]; ok {
+	if v, ok := s.stat[d]; ok {
 		v.recieved += n
-		s.Stat[d] = v
+		s.stat[d] = v
 	} else {
-		s.Stat[d] = Stat{recieved: n}
+		s.stat[d] = Stat{recieved: n}
 	}
+
+	s.statOverall.recieved += n
 
 }
 
@@ -72,12 +89,14 @@ func (s *Server) addSentBytes(n int) {
 
 	s.statMutex.Lock()
 	defer s.statMutex.Unlock()
-	if v, ok := s.Stat[d]; ok {
+	if v, ok := s.stat[d]; ok {
 		v.sent += n
-		s.Stat[d] = v
+		s.stat[d] = v
 	} else {
-		s.Stat[d] = Stat{sent: n}
+		s.stat[d] = Stat{sent: n}
 	}
+
+	s.statOverall.sent += n
 }
 
 // addErrors adds bytes to stat of current day
@@ -89,12 +108,14 @@ func (s *Server) addErrors(n int) {
 
 	s.statMutex.Lock()
 	defer s.statMutex.Unlock()
-	if v, ok := s.Stat[d]; ok {
+	if v, ok := s.stat[d]; ok {
 		v.errors += n
-		s.Stat[d] = v
+		s.stat[d] = v
 	} else {
-		s.Stat[d] = Stat{errors: n}
+		s.stat[d] = Stat{errors: n}
 	}
+
+	s.statOverall.errors += n
 }
 
 // StartedAt returns starting time

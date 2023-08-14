@@ -18,7 +18,8 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	s.ServerDoneChan = make(chan bool)
 	s.ConnChan = make(chan *conn.Connection)
 	s.connPool = make(map[string]*conn.Connection)
-	s.Stat = make(map[string]Stat)
+	s.stat = make(map[string]Stat)
+	s.statOverall = new(Stat)
 	s.connPoolMutex = sync.RWMutex{}
 	s.ver = ver
 

@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/lazybark/go-helpers/semver"
 	"github.com/lazybark/go-tls-server/v3/conn"
 )
@@ -53,9 +54,12 @@ type Server struct {
 	//ConnChan is the channel to notify external routine about new connection
 	ConnChan chan *conn.Connection
 
-	//Stat keeps connections stat by date
-	Stat      map[string]Stat
+	//stat keeps connections stat by date
+	stat      map[string]Stat
 	statMutex sync.RWMutex
+
+	//statOverall keeps stats for all working time
+	statOverall *Stat
 }
 
 // Version returns app version

@@ -80,7 +80,7 @@ func BenchmarkConnectionCorrectStringSending(b *testing.B) {
 
 	cn, _ := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	for _, str := range send {
-		//Sending bytes, so counting also bytes, not chars
+		//Sending bytes, so counting also bytes, not chars (SendString calls to SendByte)
 		b.Run(fmt.Sprintf("input_size_%d", len(str)), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				sendStringBenchmarkResult, _ = cn.SendString(str)
