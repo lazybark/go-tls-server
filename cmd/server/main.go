@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	conf := &server.Config{KeepOldConnections: 1}
+	conf := &server.Config{KeepOldConnections: 1, HttpStatMode: true, HttpStatAddr: "localhost:8080"}
 	s, err := server.New("localhost", `certs/cert.pem`, `certs/key.pem`, conf)
 	if err != nil {
 		log.Fatal(err)
@@ -23,7 +23,7 @@ func main() {
 			go func() {
 				for m := range conn.MessageChan {
 					fmt.Println("Got message:", string(m.Bytes()))
-					_, err = conn.SendString("Got ya!")
+					err = s.SendString(conn, "Got ya!")
 					if err != nil {
 						log.Fatal(err)
 					}
