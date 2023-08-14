@@ -17,6 +17,15 @@ func (s *Server) Listen(port string) {
 
 	s.listener = l
 
+	//Start HTTP server
+	if s.sConfig.HttpStatMode {
+		s.setHTTPRoutes()
+
+		go s.serveHTTP()
+	}
+
+	//Right now there is no Stop() method. So this code will never be executed.
+	//TO DO: add Stop()
 	defer func() {
 		err := l.Close()
 		if err != nil && !s.sConfig.SuppressErrors {

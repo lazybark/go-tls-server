@@ -60,6 +60,9 @@ type Server struct {
 
 	//statOverall keeps stats for all working time
 	statOverall *Stat
+
+	//resolver is the HTTP server used to serve stat data
+	resolver *chi.Mux
 }
 
 // Version returns app version

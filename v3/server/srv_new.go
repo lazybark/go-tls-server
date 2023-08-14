@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/lazybark/go-tls-server/v3/conn"
 )
 
@@ -52,6 +53,14 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	}
 	tlsConfig = &tls.Config{Certificates: []tls.Certificate{certificate}}
 	s.tlsConfig = tlsConfig
+
+	if conf.HttpStatMode {
+		if conf.HttpStatAddr == "" {
+			conf.HttpStatAddr = "localhost:3939"
+		}
+		s.resolver = chi.NewRouter()
+	}
+
 	//Start server admin
 	go s.adminRoutine()
 
