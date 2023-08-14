@@ -64,6 +64,8 @@ Keep in mind: for server to gather stat data, you need to call `server.SendByte(
 
 But it doesn't bother client: it has only one connection and always returns its stats.
 
+Also, server can show statistic via HTTP requests. Use `HttpStatMode: true` and `HttpStatAddr: "DOMAIN:PORT"` in config to enable. But be sure that this endpoint is available only from your internal network or is closed by firewall.
+
 ## Basic usage
 Basic usage is to use **Server** & **Client** behind an interface or as part of bigger struct. Both return new connections and messages via channels to external calling code which means you can create routines to process new connections and messages in them (as **Server**) or to create separate connections and communicate with **Server** (as **Client**).
 
