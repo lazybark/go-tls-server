@@ -59,6 +59,10 @@ Both  **Client** and **Server** have stats that can be useful.
 
  **Client** has:
 * Stats() - will return number of bytes sent/received + number of errors
+  
+Keep in mind: for server to gather stat data, you need to call `server.SendByte(connection, message)` or `server.SendString(connection, message)`. If you call `connection.SendX()`, it will add sent bytes to connection only.
+
+But it doesn't bother client: it has only one connection and always returns its stats.
 
 ## Basic usage
 Basic usage is to use **Server** & **Client** behind an interface or as part of bigger struct. Both return new connections and messages via channels to external calling code which means you can create routines to process new connections and messages in them (as **Server**) or to create separate connections and communicate with **Server** (as **Client**).
@@ -78,7 +82,7 @@ import (
 )
 
 func main() {
-	conf := &server.Config{KeepOldConnections: 1, NotifyAboutNewConnections: true}
+	conf := &server.Config{KeepOldConnections: 1, HttpStatMode: true, HttpStatAddr: "localhost:8080"}
 	s, err := server.New("localhost", `certs/cert.pem`, `certs/key.pem`, conf)
 	if err != nil {
 		log.Fatal(err)
@@ -93,7 +97,7 @@ func main() {
 			go func() {
 				for m := range conn.MessageChan {
 					fmt.Println("Got message:", string(m.Bytes()))
-					_, err = conn.SendString("Got ya!")
+					err = s.SendString(conn, "Got ya!")
 					if err != nil {
 						log.Fatal(err)
 					}
