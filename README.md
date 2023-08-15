@@ -34,13 +34,13 @@ Cert & key for **Server** & **Client** can be generated via [go-cert-generator](
 
 **Client** connection is closed by calling Client.Close() or by sending 'true' into Client.ClientDoneChan. Second method will trigger Client.Close() from **Client's** internal admin routine. This method exists for flexibility of external apps that will use **Client**.
 
-Important note: connections in this package are not guaranteed to be routine-safe. A single connection is not made to write/read data in concurrent way. If you wish to process messages with many routines, they should be called or receive data from channel in single routine that reads from connection exclusively. Making connection thread-safe will take extra resources to cover external app design problems and make process of transferring complex data structures (as files) become much harder.
+Important note: connections in **this package** are not guaranteed to be routine-safe (statistic at least). If you wish to process messages with many routines, still a single routine should read from connection exclusively.
 
 In this case, if you need some routine to block the reading for itself, you can call for { Connection.ReadWithContext } in this routine and release after some conditions were met. For example, if you want to read file parts after **Client** signals about sending them. This way you will know exactly what to read and when to release.
 
 And if you need to send many files at once - use new connection for each one or for batch of N files.
 
-So basic rule: each connection has exactly one controlling routine that orchestrates writing and reading process.
+So basic rule: each connection has exactly one controlling routine that orchestrates writing and reading process at a time.
 
 
 ### Reading
