@@ -1,5 +1,7 @@
 package server
 
+import "time"
+
 var (
 	//ResultError represents error with status, code and human-readable error
 	//
@@ -14,8 +16,9 @@ var (
 )
 
 type ServerStatsOutput struct {
-	Recieved    int `json:"bytes_received"`
-	Sent        int `json:"bytes_sent"`
-	Errors      int `json:"total_errors"`
-	Connections int `json:"connections"`
+	Recieved    int       `json:"bytes_received"`
+	Sent        int       `json:"bytes_sent"`
+	Errors      int       `json:"total_errors"`
+	Connections int       `json:"connections"`
+	Started     time.Time `json:"server_started"`
 }

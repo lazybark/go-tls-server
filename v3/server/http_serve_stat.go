@@ -28,6 +28,7 @@ func (s *Server) serveStatistic(w http.ResponseWriter) {
 		Recieved:    recievedBytes,
 		Errors:      errors,
 		Connections: conns,
+		Started:     s.timeStart,
 	}
 
 	oj, err := json.Marshal(o)
