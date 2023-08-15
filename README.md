@@ -15,12 +15,16 @@ Connection benchmarks are located at [v3/conn/conn_bench_test.go](https://github
 Cert & key for **Server** & **Client** can be generated via [go-cert-generator](https://github.com/lazybark/go-cert-generator).
 
 **Server** parameters:
+* `HttpStatMode (bool)` - allows connections to `HttpStatAddr` to see realtime server statistic
+* `HttpStatAddr (string)` - address & port where server should serve stat data if `HttpStatMode = true` (Default: localhost:3939)
 * `SuppressErrors (bool)` - prevents **Server** from sending errors into `ErrChan`
 * `MaxMessageSize (int)` - sets max length of one message in bytes
 * `MessageTerminator (byte)` - sets byte value that marks message end of the message in stream
 * `BufferSize (int)` - regulates buffer length to read incoming message
 * `KeepOldConnections (int)` - prevents **Server** from dropping closed connection for N minutes after it has been closed
 * `KeepInactiveConnections (int)` - makes **Server** close connection that had no activity for N mins
+
+`HttpStatMode` & `HttpStatAddr` should be inaccessible from public network.
 
 **Client** parameters:
 * `SuppressErrors (bool)` - prevents **Client** from sending errors into `ErrChan`
