@@ -39,9 +39,11 @@ Cert & key for **Server** & **Client** can be generated via [go-cert-generator](
 
 **Client** connection is closed by calling Client.Close() or by sending 'true' into Client.ClientDoneChan. Second method will trigger Client.Close() from **Client's** internal admin routine. This method exists for flexibility of external apps that will use **Client**.
 
-Important note: connections in **this package** are not guaranteed to be routine-safe (statistic at least). If you wish to process messages with many routines, still a single routine should read from connection exclusively.
+![](https://img.shields.io/badge/IMPORTANT-BC2D33)
 
-In this case, if you need some routine to block the reading for itself, you can call for { Connection.ReadWithContext } in this routine and release after some conditions were met. For example, if you want to read file parts after **Client** signals about sending them. This way you will know exactly what to read and when to release.
+If you wish to process messages with many routines, still a single routine should read from connection exclusively. It's necessary to avoid problems when reading big byte arrays like files. If you read from one connection by several routines, the data will be corrupted.
+
+In this case, if you need some routine to block the reading for itself, you can call `for { Connection.ReadWithContext }` in this routine and release after some conditions were met. For example, if you want to read file parts after **Client** signals about sending them. This way you will know exactly what to read and when to release.
 
 And if you need to send many files at once - use new connection for each one or for batch of N files.
 
@@ -51,19 +53,22 @@ So basic rule: each connection has exactly one controlling routine that orchestr
 ### Reading
 Reading is just an extracting bytes from Connection with Reader interface. When :robot: byte appears, the message returned to calling code. But, if message had bytes after :robot:, then rest of them will be saved for next reading and added at the start of next message. This is a useful feature in case your peer sends several messages at once, but may lead to sudden bugs with some values of reading buffer & max message size. So it's better to send exactly as much bytes as you want to be in one message.
 
-Important: message & close channels of  **Client** are not closed when Client.Close() called. It's made by design to keep  **Client** code simple, because there may still be some messages received or errors produced at the moment of Close() call. That's why you can still receive messages that were read from TLS connection before it was closed.
+![](https://img.shields.io/badge/IMPORTANT-BC2D33)
+
+Message & close channels of  **Client** are not closed when `Client.Close()` called. It's made by design to keep  **Client** code simple, because there may still be some messages received or errors produced at the moment of `Close()` call. That's why you can still receive messages that were read from TLS connection before it was closed.
 
 ### Statistic
 Both  **Client** and **Server** have stats that can be useful. 
 
 **Server** has:
 * `Stats(year int, month int, day int)` - will return number of bytes sent/received + number of errors or an `ErrNoStatForTheDay`
+* `StatsOverall()` - will return all statistic about server for all periods of time summarized
 * `StatsConnections()` - will simply return current number of connections in pool
 * `ActiveConnetions()` - total number of currently active (usable) connections
 * `Online()` - how long the **Server** is online
 
  **Client** has:
-* Stats() - will return number of bytes sent/received + number of errors
+* `Stats()` - will return number of bytes sent/received + number of errors
   
 Keep in mind: for server to gather stat data, you need to call `server.SendByte(connection, message)` or `server.SendString(connection, message)`. If you call `connection.SendX()`, it will add sent bytes to connection only.
 
