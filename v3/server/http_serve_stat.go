@@ -11,7 +11,7 @@ func (s *Server) serveStatistic(w http.ResponseWriter) {
 	if err != nil && !s.sConfig.SuppressErrors {
 		s.ErrChan <- fmt.Errorf("[Server][serveStatistic] %w", err)
 
-		returnUnknownInternalError(w)
+		s.returnUnknownInternalError(w)
 		return
 	}
 
@@ -19,7 +19,7 @@ func (s *Server) serveStatistic(w http.ResponseWriter) {
 	if err != nil && !s.sConfig.SuppressErrors {
 		s.ErrChan <- fmt.Errorf("[Server][serveStatistic] %w", err)
 
-		returnUnknownInternalError(w)
+		s.returnUnknownInternalError(w)
 		return
 	}
 
@@ -34,9 +34,12 @@ func (s *Server) serveStatistic(w http.ResponseWriter) {
 	if err != nil && !s.sConfig.SuppressErrors {
 		s.ErrChan <- fmt.Errorf("[Server][serveStatistic] %w", err)
 
-		returnUnknownInternalError(w)
+		s.returnUnknownInternalError(w)
 		return
 	}
 
-	w.Write([]byte(fmt.Sprintf(ResultJSON, string(oj))))
+	_, err = w.Write([]byte(fmt.Sprintf(ResultJSON, string(oj))))
+	if err != nil && !s.sConfig.SuppressErrors {
+		s.ErrChan <- fmt.Errorf("[serveApiVersion] %w", err)
+	}
 }

@@ -25,10 +25,16 @@ func (s *Server) setHTTPRoutes() {
 }
 
 func (s *Server) serveApiVersion(w http.ResponseWriter) {
-	w.Write([]byte(fmt.Sprintf(ResultString, s.Version())))
+	_, err := w.Write([]byte(fmt.Sprintf(ResultString, s.Version())))
+	if err != nil && !s.sConfig.SuppressErrors {
+		s.ErrChan <- fmt.Errorf("[serveApiVersion] %w", err)
+	}
 }
 
-func returnUnknownInternalError(w http.ResponseWriter) {
+func (s *Server) returnUnknownInternalError(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusInternalServerError)
-	w.Write([]byte(fmt.Sprintf(ResultError, 500, "unknown_error_occured")))
+	_, err := w.Write([]byte(fmt.Sprintf(ResultError, 500, "unknown_error_occured")))
+	if err != nil && !s.sConfig.SuppressErrors {
+		s.ErrChan <- fmt.Errorf("[serveApiVersion] %w", err)
+	}
 }

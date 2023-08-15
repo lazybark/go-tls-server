@@ -21,7 +21,7 @@ func TestConnectionCorrectByteSending(t *testing.T) {
 	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
 
-	cn.SendByte([]byte(send))
+	_, _ = cn.SendByte([]byte(send))
 	assert.Equal(t, send+testMessageTerminator, string(tlsConn.MWR.Bytes))
 
 	sent, rec, errs := cn.Stats()
@@ -37,7 +37,7 @@ func TestConnectionCorrectStringSending(t *testing.T) {
 	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
 
-	cn.SendString(send)
+	_, _ = cn.SendString(send)
 	assert.Equal(t, send+testMessageTerminator, string(tlsConn.MWR.Bytes))
 
 	sent, rec, errs := cn.Stats()

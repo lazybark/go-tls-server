@@ -19,7 +19,10 @@ func (s *Server) adminRoutine() {
 				}
 				//If it's not closed, but it's been a 'KeepInactiveConnections' time after
 				if !c.Closed() && s.sConfig.KeepInactiveConnections > 0 && !time.Now().Before(c.LastAct().Add(time.Minute*time.Duration(s.sConfig.KeepInactiveConnections))) {
-					s.CloseConnection(c)
+					err := s.CloseConnection(c)
+					if err != nil && !s.sConfig.SuppressErrors {
+						s.ErrChan <- fmt.Errorf("[Server][Listen] error closing connection: %w", err)
+					}
 				}
 			}
 		//In case server needs to be stopped - close all connections

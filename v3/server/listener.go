@@ -67,7 +67,11 @@ func (s *Server) recieve(c *conn.Connection) {
 			if !s.sConfig.SuppressErrors {
 				s.ErrChan <- fmt.Errorf("[Server][recieve] error reading from %s: %w", c.Id(), err)
 			}
-			s.CloseConnection(c)
+			err := s.CloseConnection(c)
+			if err != nil && !s.sConfig.SuppressErrors {
+				s.ErrChan <- fmt.Errorf("[Server][recieve] error closing connection: %w", err)
+			}
+
 			return
 		}
 
