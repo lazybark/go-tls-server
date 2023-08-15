@@ -13,6 +13,10 @@ import (
 // Other errors should be treated manually by external code.
 // In all cases method will return last bytes read
 func (c *Connection) ReadWithContext(buffer, maxSize int, terminator byte) ([]byte, int, error) {
+	if c.Closed() {
+		return nil, 0, fmt.Errorf("[ReadWithContext] %w", ErrReaderAlreadyClosed)
+	}
+
 	//Using c.conn.SetReadDeadline(time) in that case will make connection process less flexible.
 	//Instead, checking ctx gives us a way to handle timeouts by the server itself.
 	//We can, for example, close connection after some inactivity period by checking c.lastAct
@@ -32,6 +36,8 @@ func (c *Connection) ReadWithContext(buffer, maxSize int, terminator byte) ([]by
 		select {
 		case <-c.ctx.Done():
 			// Break by context
+			_ = c.closeTLS() //We close TLS only by reader
+
 			return nil, read, nil
 		default:
 			n, err := c.tlsConn.Read(b)
@@ -40,6 +46,8 @@ func (c *Connection) ReadWithContext(buffer, maxSize int, terminator byte) ([]by
 					return nil, read, fmt.Errorf("[ReadWithContext] %w", ErrStreamClosed)
 				}
 				if c.ctx.Done() != nil {
+					_ = c.closeTLS() //We close TLS only by reader
+
 					return nil, read, nil
 				}
 				c.addErrors(1)

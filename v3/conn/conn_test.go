@@ -177,7 +177,7 @@ func TestConnectionReadingClose(t *testing.T) {
 
 	go func() {
 		time.Sleep(time.Second * 3)
-		cn.Close()
+		_ = cn.Close()
 	}()
 
 	read, count, err = cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
@@ -191,9 +191,14 @@ func TestConnectionReadingClose(t *testing.T) {
 	assert.Equal(t, 0, errs)                     //Errors 0, as there was no error itself, just stopped by externall call
 	assert.Equal(t, 0, sent)
 
-	assert.Equal(t, true, cn.isClosed)
 	assert.Equal(t, true, cn.Closed())
 	assert.Equal(t, true, tlsConn.AskedToBeClosed)
+
+	//And read over already closed connection
+	read, count, err = cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
+	assert.True(t, errors.Is(err, ErrReaderAlreadyClosed))
+	assert.Empty(t, read)
+	assert.Empty(t, count)
 }
 
 func TestConnectionReadingEOF(t *testing.T) {

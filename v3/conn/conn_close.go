@@ -28,18 +28,25 @@ func (c *Connection) Close() error {
 	return c.close()
 }
 
-// close closes the connection with remote
+// close marks connection as closed, but TLS will be closed by reader
 func (c *Connection) close() error {
 	c.mu.Lock()
-	defer c.mu.Unlock()
 
 	c.cancel()
-	err := c.tlsConn.Close()
-	if err != nil {
-		return fmt.Errorf("[Connection][close] %w", err)
-	}
 	c.isClosed = true
 	c.closedAt = npt.Now()
+
+	c.mu.Unlock()
+
+	return nil
+}
+
+// closeTLS closes the TLS connection itself. To avoid data race it should be called by the reader function
+func (c *Connection) closeTLS() error {
+	err := c.tlsConn.Close()
+	if err != nil {
+		return fmt.Errorf("[Connection][closeTLS] %w", err)
+	}
 
 	return nil
 }
