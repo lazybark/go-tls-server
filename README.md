@@ -1,6 +1,7 @@
 # go-tls-server
 ![](https://img.shields.io/badge/golang-00ADD8?logo=go&amp;logoColor=white)
 [![Test](https://github.com/lazybark/go-tls-server/actions/workflows/test.yml/badge.svg)](https://github.com/lazybark/go-tls-server/actions/workflows/test.yml)
+[![golangci-lint](https://github.com/lazybark/go-tls-server/actions/workflows/lint.yml/badge.svg)](https://github.com/lazybark/go-tls-server/actions/workflows/lint.yml)
 ![](https://img.shields.io/badge/license-MIT-blue)
 ![](https://img.shields.io/badge/Version-3.1.0beta-purple)
 ![GitHub last commit](https://img.shields.io/github/last-commit/lazybark/go-tls-server)
