@@ -99,13 +99,25 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	go s.Listen("5555")
+
 	for {
 		select {
-		case err := <-s.ErrChan:
+		case err, ok := <-s.ErrChan:
+			if !ok {
+				return
+			}
+
 			fmt.Println(err)
-		case conn := <-s.ConnChan:
+
+		case conn, ok := <-s.ConnChan:
+			if !ok {
+				return
+			}
+
 			fmt.Println(conn.Address())
+
 			go func() {
 				for m := range conn.MessageChan {
 					fmt.Println("Got message:", string(m.Bytes()))
