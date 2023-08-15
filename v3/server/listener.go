@@ -2,8 +2,13 @@ package server
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"log"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/lazybark/go-tls-server/v3/conn"
 )
@@ -24,33 +29,59 @@ func (s *Server) Listen(port string) {
 		go s.serveHTTP()
 	}
 
-	//Right now there is no Stop() method. So this code will never be executed.
-	//TO DO: add Stop()
-	defer func() {
-		err := l.Close()
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+		<-sigint
+
+		err := s.Stop()
 		if err != nil && !s.sConfig.SuppressErrors {
-			s.ErrChan <- fmt.Errorf("[Server][Listen] error closing listener: %w", err)
+			s.ErrChan <- err
 		}
 	}()
 
 	for {
-		//Accept the connection
-		tlsConn, err := l.Accept()
-		if err != nil && !s.sConfig.SuppressErrors {
-			s.ErrChan <- fmt.Errorf("[Server][Listen] error accepting connection from %v: %w", tlsConn.RemoteAddr(), err)
-		}
 
-		c, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, s.sConfig.MessageTerminator)
-		if err != nil && !s.sConfig.SuppressErrors {
-			s.ErrChan <- fmt.Errorf("[Server][Listen] error making connection for %v: %w", tlsConn.RemoteAddr(), err)
-		}
+		select {
+		case <-s.ctx.Done():
 
-		//Add to pool
-		s.addToPool(c)
-		//Notify outer routine
-		s.ConnChan <- c
-		//Wait for new messages
-		go s.recieve(c)
+			return
+
+		default:
+			//Accept the connection
+			tlsConn, err := l.Accept()
+
+			//The problem is that a listener can be closed during the listening. Then we get net.ErrClosed.
+			//In this case we always ignore it, because doesn't matter why it's closed - this function is not for err processing
+			//Error was handled somewhere else already. Or server was simply terminated
+			//TO DO: think if there is more graceful way than errors.Is
+			if err != nil {
+				if errors.Is(err, net.ErrClosed) {
+					continue
+				}
+				if !s.sConfig.SuppressErrors {
+					s.ErrChan <- fmt.Errorf("[Server][Listen] error accepting connection: %w", err)
+				}
+			}
+
+			//Just a precaution to avoid nil pointer dereference
+			if tlsConn == nil {
+				continue
+			}
+
+			c, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, s.sConfig.MessageTerminator)
+			if err != nil && !s.sConfig.SuppressErrors {
+				s.ErrChan <- fmt.Errorf("[Server][Listen] error making connection for %v: %w", tlsConn.RemoteAddr(), err)
+			}
+
+			//Add to pool
+			s.addToPool(c)
+			//Notify outer routine
+			s.ConnChan <- c
+			//Wait for new messages
+			go s.recieve(c)
+		}
 	}
 }
 

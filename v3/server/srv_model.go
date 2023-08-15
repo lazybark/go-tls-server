@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/tls"
 	"net"
 	"sync"
@@ -63,6 +64,10 @@ type Server struct {
 
 	//resolver is the HTTP server used to serve stat data
 	resolver *chi.Mux
+
+	//ctx is the server context
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 // Version returns app version

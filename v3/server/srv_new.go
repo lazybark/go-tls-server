@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"sync"
@@ -23,6 +24,10 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	s.statOverall = new(Stat)
 	s.connPoolMutex = sync.RWMutex{}
 	s.ver = ver
+
+	ctx, cancel := context.WithCancel(context.Background())
+	s.cancel = cancel
+	s.ctx = ctx
 
 	if conf == nil {
 		conf = &Config{}
