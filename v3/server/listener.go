@@ -6,9 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/lazybark/go-tls-server/v3/conn"
 )
@@ -28,18 +25,6 @@ func (s *Server) Listen(port string) {
 
 		go s.serveHTTP()
 	}
-
-	go func() {
-		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-
-		<-sigint
-
-		err := s.Stop()
-		if err != nil && !s.sConfig.SuppressErrors {
-			s.ErrChan <- err
-		}
-	}()
 
 	for {
 
