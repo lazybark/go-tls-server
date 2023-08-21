@@ -35,16 +35,16 @@ type Connection struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	//bytesLeft holds extra bytes that were read from stream after terminator occured, but end of buffer was not reached
+	//bytesLeft holds extra bytes that were read from stream after terminator occurred, but end of buffer was not reached
 	bytesLeft []byte
 
 	//bs holds total bytes sent by server in connection
 	bs int
 
-	//br holds total bytes recieved by server in connection
+	//br holds total bytes received by server in connection
 	br int
 
-	//errors holds total number of errors occured in connection
+	//errors holds total number of errors occurred in connection
 	errors int
 
 	//MessageTerminator sets byte value that marks message end in the stream.

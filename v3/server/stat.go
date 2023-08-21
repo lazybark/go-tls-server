@@ -7,7 +7,7 @@ import (
 
 // Stat holds server statistic
 type Stat struct {
-	recieved int
+	received int
 	sent     int
 	errors   int
 }
@@ -22,27 +22,27 @@ func getStatKey() string {
 }
 
 // Stats returns server stats for specified day or error in case date is not in stat
-func (s *Server) StatsOverall() (sentBytes, recievedBytes, errors int, err error) {
+func (s *Server) StatsOverall() (sentBytes, receivedBytes, errors int, err error) {
 	//Right now err is not used - added for compatibility for future
 
 	s.statMutex.Lock()
 	defer s.statMutex.Unlock()
 
 	sentBytes = s.statOverall.sent
-	recievedBytes = s.statOverall.recieved
+	receivedBytes = s.statOverall.received
 	errors = s.statOverall.errors
 
 	return
 }
 
 // Stats returns server stats for specified day or error in case date is not in stat
-func (s *Server) Stats(y int, m int, d int) (sentBytes, recievedBytes, errors int, err error) {
+func (s *Server) Stats(y int, m int, d int) (sentBytes, receivedBytes, errors int, err error) {
 	date := fmt.Sprintf(statKeyPattern, y, m, d)
 
 	s.statMutex.Lock()
 	defer s.statMutex.Unlock()
 	if v, ok := s.stat[date]; ok {
-		return v.sent, v.recieved, v.errors, nil
+		return v.sent, v.received, v.errors, nil
 	}
 
 	err = ErrNoStatForTheDay
@@ -70,13 +70,13 @@ func (s *Server) addRecBytes(n int) {
 	s.statMutex.Lock()
 	defer s.statMutex.Unlock()
 	if v, ok := s.stat[d]; ok {
-		v.recieved += n
+		v.received += n
 		s.stat[d] = v
 	} else {
-		s.stat[d] = Stat{recieved: n}
+		s.stat[d] = Stat{received: n}
 	}
 
-	s.statOverall.recieved += n
+	s.statOverall.received += n
 
 }
 

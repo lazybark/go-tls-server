@@ -25,7 +25,7 @@ func (s *Server) serveStatistic(w http.ResponseWriter) {
 
 	o := ServerStatsOutput{
 		Sent:        sentBytes,
-		Recieved:    recievedBytes,
+		Received:    recievedBytes,
 		Errors:      errors,
 		Connections: conns,
 		Started:     s.timeStart,

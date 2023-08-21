@@ -16,7 +16,7 @@ var (
 )
 
 type ServerStatsOutput struct {
-	Recieved    int       `json:"bytes_received"`
+	Received    int       `json:"bytes_received"`
 	Sent        int       `json:"bytes_sent"`
 	Errors      int       `json:"total_errors"`
 	Connections int       `json:"connections"`

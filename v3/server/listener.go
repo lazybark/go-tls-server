@@ -65,15 +65,15 @@ func (s *Server) Listen(port string) {
 			//Notify outer routine
 			s.ConnChan <- c
 			//Wait for new messages
-			go s.recieve(c)
+			go s.receive(c)
 		}
 	}
 }
 
-// recieve endlessy reads incoming stream and delivers messages to recievers outside server routine.
+// receive endlessly reads incoming stream and delivers messages to receivers outside server routine.
 // It uses ReadWithContext, so execution can be manually stopped by calling c.cancel on specific connection.
 // In that case (or if any error occurs) method will trigger s.CloseConnection to break connection too
-func (s *Server) recieve(c *conn.Connection) {
+func (s *Server) receive(c *conn.Connection) {
 	for {
 		if c.Closed() {
 			return
@@ -81,11 +81,11 @@ func (s *Server) recieve(c *conn.Connection) {
 		b, n, err := c.ReadWithContext(s.sConfig.BufferSize, s.sConfig.MaxMessageSize, s.sConfig.MessageTerminator)
 		if err != nil {
 			if !s.sConfig.SuppressErrors {
-				s.ErrChan <- fmt.Errorf("[Server][recieve] error reading from %s: %w", c.Id(), err)
+				s.ErrChan <- fmt.Errorf("[Server][receive] error reading from %s: %w", c.Id(), err)
 			}
 			err := s.CloseConnection(c)
 			if err != nil && !s.sConfig.SuppressErrors {
-				s.ErrChan <- fmt.Errorf("[Server][recieve] error closing connection: %w", err)
+				s.ErrChan <- fmt.Errorf("[Server][receive] error closing connection: %w", err)
 			}
 
 			return

@@ -39,14 +39,14 @@ type Client struct {
 	//ErrChan is the channel to send errors into external routine
 	ErrChan chan error
 
-	//ClientDoneChan is the channel to recieve client stopping command from external routine.
+	//ClientDoneChan is the channel to receive client stopping command from external routine.
 	//It's not used by default and exist to provide flexibility for bigger apps that will use client
 	ClientDoneChan chan bool
 
 	//MessageChan channel to notify external routine about new messages
 	MessageChan chan *conn.Message
 
-	//connCount holds total number of successfull conections of the client
+	//connCount holds total number of successful conections of the client
 	connCount int
 
 	//mu is used to set client closed to state. It's not protecting stat variables which means

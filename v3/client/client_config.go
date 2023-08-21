@@ -19,6 +19,6 @@ type Config struct {
 	//BufferSize regulates buffer length to read incoming message. Default value is 128
 	BufferSize int
 
-	//DropOldStats = true will make client to set all sent/recieved bytes & errors to zero before opening new connection
+	//DropOldStats = true will make client to set all sent/received bytes & errors to zero before opening new connection
 	DropOldStats bool
 }

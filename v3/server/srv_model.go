@@ -49,7 +49,7 @@ type Server struct {
 	//ErrChan is the channel to send errors into external routine
 	ErrChan chan error
 
-	//ServerDoneChan is the channel to recieve server stopping command
+	//ServerDoneChan is the channel to receive server stopping command
 	ServerDoneChan chan bool
 
 	//ConnChan is the channel to notify external routine about new connection

@@ -33,7 +33,7 @@ func (s *Server) serveApiVersion(w http.ResponseWriter) {
 
 func (s *Server) returnUnknownInternalError(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusInternalServerError)
-	_, err := w.Write([]byte(fmt.Sprintf(ResultError, 500, "unknown_error_occured")))
+	_, err := w.Write([]byte(fmt.Sprintf(ResultError, 500, "unknown_error_occurred")))
 	if err != nil && !s.sConfig.SuppressErrors {
 		s.ErrChan <- fmt.Errorf("[serveApiVersion] %w", err)
 	}
