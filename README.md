@@ -7,7 +7,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/lazybark/go-tls-server)
 
 
-go-tls-server is a small lib to create client-server apps using `tls.Conn`. It uses standard libs to create stream-like message exchange protected by TLS. Every message ends with a terminator (:robot:) symbol and the main idea is to read from connection until :robot: appears, then process what we read and repeat reading. This way we can create apps that control their behaviour using any possible custom protocol/message set.
+**go-tls-server** is a small lib to create client-server apps using `tls.Conn`. It uses standard libs to create stream-like message exchange protected by TLS. Every message ends with a terminator (:robot:) symbol and the main idea is to read from connection until :robot: appears, then process what we read and repeat reading. This way we can create apps that control their behaviour using any possible custom protocol/message set.
 
 A practical example of how it works you can find in [go-cloud-sync](https://github.com/lazybark/go-cloud-sync).
 
