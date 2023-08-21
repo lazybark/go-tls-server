@@ -2,8 +2,9 @@
 ![](https://img.shields.io/badge/golang-00ADD8?logo=go&amp;logoColor=white)
 [![Test](https://github.com/lazybark/go-tls-server/actions/workflows/test.yml/badge.svg)](https://github.com/lazybark/go-tls-server/actions/workflows/test.yml)
 [![golangci-lint](https://github.com/lazybark/go-tls-server/actions/workflows/lint.yml/badge.svg)](https://github.com/lazybark/go-tls-server/actions/workflows/lint.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lazybark/go-tls-server)](https://goreportcard.com/report/github.com/lazybark/go-tls-server)
 ![](https://img.shields.io/badge/license-MIT-blue)
-![](https://img.shields.io/badge/Version-3.1.0beta-purple)
+![](https://img.shields.io/badge/Version-1.1.1-purple)
 ![GitHub last commit](https://img.shields.io/github/last-commit/lazybark/go-tls-server)
 
 
