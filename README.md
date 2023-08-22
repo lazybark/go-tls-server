@@ -4,7 +4,7 @@
 [![golangci-lint](https://github.com/lazybark/go-tls-server/actions/workflows/lint.yml/badge.svg)](https://github.com/lazybark/go-tls-server/actions/workflows/lint.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lazybark/go-tls-server)](https://goreportcard.com/report/github.com/lazybark/go-tls-server)
 ![](https://img.shields.io/badge/license-MIT-blue)
-![](https://img.shields.io/badge/Version-1.1.1-purple)
+![](https://img.shields.io/badge/Version-1.2.0-purple)
 ![GitHub last commit](https://img.shields.io/github/last-commit/lazybark/go-tls-server)
 
 
