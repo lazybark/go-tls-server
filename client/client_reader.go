@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 
-	"github.com/lazybark/go-tls-server/v3/conn"
+	"github.com/lazybark/go-tls-server/conn"
 )
 
 // Reader infinitely reads messages from opened connection

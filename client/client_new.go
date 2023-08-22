@@ -3,7 +3,7 @@ package client
 import (
 	"sync"
 
-	"github.com/lazybark/go-tls-server/v3/conn"
+	"github.com/lazybark/go-tls-server/conn"
 )
 
 // New creates new Client with specified config or default parameters

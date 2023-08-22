@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/lazybark/go-tls-server/v3/conn"
+	"github.com/lazybark/go-tls-server/conn"
 )
 
 // DialTo dials to specified server and port using cert if provided.

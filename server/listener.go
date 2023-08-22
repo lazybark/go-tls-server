@@ -7,7 +7,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/lazybark/go-tls-server/v3/conn"
+	"github.com/lazybark/go-tls-server/conn"
 )
 
 // Listen runs listener interface implementations and accepts connections

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/lazybark/go-tls-server/v3/conn"
+	"github.com/lazybark/go-tls-server/conn"
 )
 
 // New initializes server instance and makes it completely ready to listen for connections

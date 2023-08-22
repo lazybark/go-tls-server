@@ -1,6 +1,6 @@
 package server
 
-import "github.com/lazybark/go-tls-server/v3/conn"
+import "github.com/lazybark/go-tls-server/conn"
 
 // CloseConnection is the only correct way to close connection.
 // It changes conn state in pool and then calls to c.close

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lazybark/go-tls-server/v3/conn"
+	"github.com/lazybark/go-tls-server/conn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

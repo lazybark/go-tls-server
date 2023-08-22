@@ -91,7 +91,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/lazybark/go-tls-server/v3/server"
+	"github.com/lazybark/go-tls-server/server"
 )
 
 func main() {
@@ -142,7 +142,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/lazybark/go-tls-server/v3/client"
+	"github.com/lazybark/go-tls-server/client"
 )
 
 func main() {
@@ -192,7 +192,7 @@ As an example of using the **Server** in bigger project, you can create struct t
 ```
 package server
 
-import "github.com/lazybark/go-tls-server/v3/conn"
+import "github.com/lazybark/go-tls-server/conn"
 
 type LinkServer struct {
 	extConnChan chan (*conn.Connection)
@@ -216,8 +216,8 @@ package server
 import (
 	"fmt"
 
-	"github.com/lazybark/go-tls-server/v3/conn"
-	gts "github.com/lazybark/go-tls-server/v3/server"
+	"github.com/lazybark/go-tls-server/conn"
+	gts "github.com/lazybark/go-tls-server/server"
 )
 
 // Init prepares server to accept connections
@@ -268,7 +268,7 @@ Same goes for **Client**. You create some struct with parameters and client fiel
 package client
 
 import (
-	"github.com/lazybark/go-tls-server/v3/client"
+	"github.com/lazybark/go-tls-server/client"
 )
 
 // LinkClient  works with lazybark/go-tls-server to implement ISyncLinkClientV1 interface
@@ -297,7 +297,7 @@ package client
 import (
 	"fmt"
 
-	tls "github.com/lazybark/go-tls-server/v3/client"
+	tls "github.com/lazybark/go-tls-server/client"
 )
 
 // setAuth sets existing key & session ID to the connection

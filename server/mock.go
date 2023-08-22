@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lazybark/go-tls-server/v3/conn"
+	"github.com/lazybark/go-tls-server/conn"
 )
 
 func GetEmptyTestServer() *Server {

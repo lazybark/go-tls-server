@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/lazybark/go-tls-server/v3/client"
+	"github.com/lazybark/go-tls-server/client"
 )
 
 func main() {
