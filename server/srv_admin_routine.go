@@ -21,21 +21,21 @@ func (s *Server) adminRoutine() {
 				if !c.Closed() && s.sConfig.KeepInactiveConnections > 0 && !time.Now().Before(c.LastAct().Add(time.Minute*time.Duration(s.sConfig.KeepInactiveConnections))) {
 					err := s.CloseConnection(c)
 					if err != nil && !s.sConfig.SuppressErrors {
-						s.ErrChan <- fmt.Errorf("[Server][Listen] error closing connection: %w", err)
+						s.errChan <- fmt.Errorf("[Server][Listen] error closing connection: %w", err)
 					}
 				}
 			}
 		//In case server needs to be stopped - close all connections
-		case d := <-s.ServerDoneChan:
+		case d := <-s.serverDoneChan:
 			if d {
 				err := s.listener.Close()
 				if err != nil && !s.sConfig.SuppressErrors {
-					s.ErrChan <- fmt.Errorf("[Server][Listen] error closing listener: %w", err)
+					s.errChan <- fmt.Errorf("[Server][Listen] error closing listener: %w", err)
 				}
 				for _, c := range s.connPool {
 					err := s.CloseConnection(c)
 					if err != nil && !s.sConfig.SuppressErrors {
-						s.ErrChan <- fmt.Errorf("[Server][adminRoutine] error closing connection %s -> %w", c.Id(), err)
+						s.errChan <- fmt.Errorf("[Server][adminRoutine] error closing connection %s -> %w", c.Id(), err)
 					}
 				}
 			}

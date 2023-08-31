@@ -46,14 +46,14 @@ type Server struct {
 	//sConfig points to server config
 	sConfig *Config
 
-	//ErrChan is the channel to send errors into external routine
-	ErrChan chan error
+	//errChan is the channel to send errors into external routine
+	errChan chan error
 
-	//ServerDoneChan is the channel to receive server stopping command
-	ServerDoneChan chan bool
+	//serverDoneChan is the channel to receive server stopping command
+	serverDoneChan chan bool
 
-	//ConnChan is the channel to notify external routine about new connection
-	ConnChan chan *conn.Connection
+	//connChan is the channel to notify external routine about new connection
+	connChan chan *conn.Connection
 
 	//stat keeps connections stat by date
 	stat      map[string]Stat
@@ -75,3 +75,9 @@ func (s *Server) Version() semver.Ver { return s.ver }
 
 // Version returns app version string
 func (s *Server) VersionString() string { return s.ver.String() }
+
+// ErrChan returns server error channel available to read only
+func (s *Server) ErrChan() <-chan error { return s.errChan }
+
+// ConnChan returns server new connections channel available to read only
+func (s *Server) ConnChan() <-chan *conn.Connection { return s.connChan }

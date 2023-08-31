@@ -54,9 +54,6 @@ So basic rule: each connection has exactly one controlling routine that orchestr
 ### Reading
 Reading is just an extracting bytes from Connection with Reader interface. When :robot: byte appears, the message returned to calling code. But, if message had bytes after :robot:, then rest of them will be saved for next reading and added at the start of next message. This is a useful feature in case your peer sends several messages at once, but may lead to sudden bugs with some values of reading buffer & max message size. So it's better to send exactly as much bytes as you want to be in one message.
 
-![](https://img.shields.io/badge/IMPORTANT-BC2D33)
-
-Message & close channels of  **Client** are not closed when `Client.Close()` called. It's made by design to keep  **Client** code simple, because there may still be some messages received or errors produced at the moment of `Close()` call. That's why you can still receive messages that were read from TLS connection before it was closed.
 
 ### Statistic
 Both  **Client** and **Server** have stats that can be useful. 
@@ -242,14 +239,14 @@ func (s *LinkServer) Listen(addr, port string) error {
 
 		for {
 			select {
-			case err, ok := <-srv.ErrChan:
+			case err, ok := <-srv.ErrChan():
 				if !ok {
 					return
 				}
 
 				s.extErrChan <- fmt.Errorf("[Link][Listen]%w", err)
 
-			case c, ok := <-srv.ConnChan:
+			case c, ok := <-srv.ConnChan():
 				if !ok {
 					return
 				}

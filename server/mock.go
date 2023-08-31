@@ -11,9 +11,9 @@ func GetEmptyTestServer() *Server {
 	s := new(Server)
 	s.timeStart = time.Now()
 	s.host = "localhost"
-	s.ErrChan = make(chan error)
-	s.ServerDoneChan = make(chan bool)
-	s.ConnChan = make(chan *conn.Connection)
+	s.errChan = make(chan error)
+	s.serverDoneChan = make(chan bool)
+	s.connChan = make(chan *conn.Connection)
 	s.connPool = make(map[string]*conn.Connection)
 	s.stat = make(map[string]Stat)
 	s.statOverall = &Stat{}

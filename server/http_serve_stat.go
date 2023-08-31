@@ -9,7 +9,7 @@ import (
 func (s *Server) serveStatistic(w http.ResponseWriter) {
 	sentBytes, recievedBytes, errors, err := s.StatsOverall() //Error is always
 	if err != nil && !s.sConfig.SuppressErrors {
-		s.ErrChan <- fmt.Errorf("[Server][serveStatistic] %w", err)
+		s.errChan <- fmt.Errorf("[Server][serveStatistic] %w", err)
 
 		s.returnUnknownInternalError(w)
 		return
@@ -17,7 +17,7 @@ func (s *Server) serveStatistic(w http.ResponseWriter) {
 
 	conns, err := s.StatsConnections()
 	if err != nil && !s.sConfig.SuppressErrors {
-		s.ErrChan <- fmt.Errorf("[Server][serveStatistic] %w", err)
+		s.errChan <- fmt.Errorf("[Server][serveStatistic] %w", err)
 
 		s.returnUnknownInternalError(w)
 		return
@@ -33,7 +33,7 @@ func (s *Server) serveStatistic(w http.ResponseWriter) {
 
 	oj, err := json.Marshal(o)
 	if err != nil && !s.sConfig.SuppressErrors {
-		s.ErrChan <- fmt.Errorf("[Server][serveStatistic] %w", err)
+		s.errChan <- fmt.Errorf("[Server][serveStatistic] %w", err)
 
 		s.returnUnknownInternalError(w)
 		return
@@ -41,6 +41,6 @@ func (s *Server) serveStatistic(w http.ResponseWriter) {
 
 	_, err = w.Write([]byte(fmt.Sprintf(ResultJSON, string(oj))))
 	if err != nil && !s.sConfig.SuppressErrors {
-		s.ErrChan <- fmt.Errorf("[serveApiVersion] %w", err)
+		s.errChan <- fmt.Errorf("[serveApiVersion] %w", err)
 	}
 }

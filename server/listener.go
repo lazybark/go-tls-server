@@ -46,7 +46,7 @@ func (s *Server) Listen(port string) {
 					continue
 				}
 				if !s.sConfig.SuppressErrors {
-					s.ErrChan <- fmt.Errorf("[Server][Listen] error accepting connection: %w", err)
+					s.errChan <- fmt.Errorf("[Server][Listen] error accepting connection: %w", err)
 				}
 			}
 
@@ -57,13 +57,13 @@ func (s *Server) Listen(port string) {
 
 			c, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, s.sConfig.MessageTerminator)
 			if err != nil && !s.sConfig.SuppressErrors {
-				s.ErrChan <- fmt.Errorf("[Server][Listen] error making connection for %v: %w", tlsConn.RemoteAddr(), err)
+				s.errChan <- fmt.Errorf("[Server][Listen] error making connection for %v: %w", tlsConn.RemoteAddr(), err)
 			}
 
 			//Add to pool
 			s.addToPool(c)
 			//Notify outer routine
-			s.ConnChan <- c
+			s.connChan <- c
 			//Wait for new messages
 			go s.receive(c)
 		}
@@ -81,11 +81,11 @@ func (s *Server) receive(c *conn.Connection) {
 		b, n, err := c.ReadWithContext(s.sConfig.BufferSize, s.sConfig.MaxMessageSize, s.sConfig.MessageTerminator)
 		if err != nil {
 			if !s.sConfig.SuppressErrors {
-				s.ErrChan <- fmt.Errorf("[Server][receive] error reading from %s: %w", c.Id(), err)
+				s.errChan <- fmt.Errorf("[Server][receive] error reading from %s: %w", c.Id(), err)
 			}
 			err := s.CloseConnection(c)
 			if err != nil && !s.sConfig.SuppressErrors {
-				s.ErrChan <- fmt.Errorf("[Server][receive] error closing connection: %w", err)
+				s.errChan <- fmt.Errorf("[Server][receive] error closing connection: %w", err)
 			}
 
 			return

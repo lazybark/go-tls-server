@@ -9,14 +9,14 @@ func (s *Server) Stop() error {
 	for _, conn := range s.connPool {
 		err = conn.Close()
 		if err != nil && !s.sConfig.SuppressErrors {
-			s.ErrChan <- err
+			s.errChan <- err
 		}
 	}
 	s.connPoolMutex.Unlock()
 
 	//At this point no routine will be left that can write in these channels
-	close(s.ConnChan)
-	close(s.ErrChan)
+	close(s.connChan)
+	close(s.errChan)
 
 	return nil
 }

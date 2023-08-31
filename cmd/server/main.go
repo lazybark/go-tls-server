@@ -18,14 +18,14 @@ func main() {
 
 	for {
 		select {
-		case err, ok := <-s.ErrChan:
+		case err, ok := <-s.ErrChan():
 			if !ok {
 				return
 			}
 
 			fmt.Println(err)
 
-		case conn, ok := <-s.ConnChan:
+		case conn, ok := <-s.ConnChan():
 			if !ok {
 				return
 			}
