@@ -94,7 +94,7 @@ func (s *Server) receive(c *conn.Connection) {
 		//Check in case we read 0 bytes
 		if n > 0 {
 			s.addRecBytes(n)
-			c.MessageChan <- conn.NewMessage(c, n, b)
+			c.MessageChanWrite() <- conn.NewMessage(c, n, b)
 		}
 	}
 }

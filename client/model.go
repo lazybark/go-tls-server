@@ -36,15 +36,15 @@ type Client struct {
 	//conf points to client config
 	conf *Config
 
-	//ErrChan is the channel to send errors into external routine
-	ErrChan chan error
+	//errChan is the channel to send errors into external routine
+	errChan chan error
 
 	//ClientDoneChan is the channel to receive client stopping command from external routine.
 	//It's not used by default and exist to provide flexibility for bigger apps that will use client
 	ClientDoneChan chan bool
 
-	//MessageChan channel to notify external routine about new messages
-	MessageChan chan *conn.Message
+	//messageChan channel to notify external routine about new messages
+	messageChan chan *conn.Message
 
 	//connCount holds total number of successful conections of the client
 	connCount int
@@ -52,6 +52,16 @@ type Client struct {
 	//mu is used to set client closed to state. It's not protecting stat variables which means
 	//reading and/or writing should not be done concurrently
 	mu *sync.RWMutex
+}
+
+// ErrChan returns clients's error channel to read only
+func (c *Client) ErrChan() <-chan error {
+	return c.errChan
+}
+
+// MessageChan returns clients's message channel to read only
+func (c *Client) MessageChan() <-chan *conn.Message {
+	return c.messageChan
 }
 
 // Stats returns number of bytes sent/receive + number of errors

@@ -14,7 +14,7 @@ func NewConnection(ip net.Addr, conn net.Conn, t byte) (*Connection, error) {
 	c := new(Connection)
 	c.connectedAt = npt.Now()
 	c.lastAct = c.connectedAt
-	c.MessageChan = make(chan *Message)
+	c.messageChan = make(chan *Message)
 	c.mu = &sync.RWMutex{}
 
 	id, err := uuid.NewV4()

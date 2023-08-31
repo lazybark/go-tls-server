@@ -33,7 +33,7 @@ func main() {
 			fmt.Println(conn.Address())
 
 			go func() {
-				for m := range conn.MessageChan {
+				for m := range conn.MessageChanRead() {
 					fmt.Println("Got message:", string(m.Bytes()))
 					err = s.SendString(conn, "Got ya!")
 					if err != nil {

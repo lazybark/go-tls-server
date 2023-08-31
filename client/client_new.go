@@ -9,9 +9,9 @@ import (
 // New creates new Client with specified config or default parameters
 func New(conf *Config) *Client {
 	c := new(Client)
-	c.ErrChan = make(chan error, 3)
+	c.errChan = make(chan error, 3)
 	c.ClientDoneChan = make(chan bool)
-	c.MessageChan = make(chan *conn.Message, 10)
+	c.messageChan = make(chan *conn.Message, 10)
 	c.mu = &sync.RWMutex{}
 
 	if conf == nil {

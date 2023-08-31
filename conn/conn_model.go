@@ -51,8 +51,8 @@ type Connection struct {
 	//Works for both incoming and outgoing messages
 	messageTerminator byte
 
-	//MessageChan channel to notify external routine about new messages
-	MessageChan chan *Message
+	//messageChan channel to notify external routine about new messages
+	messageChan chan *Message
 
 	mu *sync.RWMutex
 }
@@ -65,3 +65,9 @@ func (c *Connection) Id() string { return c.id }
 
 // SetMessageTerminator sets byte that will be used as message terminator
 func (c *Connection) SetMessageTerminator(t byte) { c.messageTerminator = t }
+
+// MessageChanRead returns connection's message channel to read only
+func (c *Connection) MessageChanRead() <-chan *Message { return c.messageChan }
+
+// MessageChanWrite returns connection's message channel to write only
+func (c *Connection) MessageChanWrite() chan<- *Message { return c.messageChan }
