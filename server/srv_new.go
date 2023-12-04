@@ -7,11 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-chi/chi"
 	"github.com/lazybark/go-tls-server/conn"
 )
 
-// New initializes server instance and makes it completely ready to listen for connections
+// New initializes server instance and makes it completely ready to listen for connections.
 func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	s := new(Server)
 	s.timeStart = time.Now()
@@ -32,20 +31,20 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	if conf == nil {
 		conf = &Config{}
 	}
-	//Default terminator is the newline
+	// Default terminator is the newline.
 	if conf.MessageTerminator == 0 {
 		conf.MessageTerminator = '\n'
 	}
 
-	//Default buffer is 128 B
+	// Default buffer is 128 B.
 	if conf.BufferSize == 0 {
 		conf.BufferSize = 128
 	}
-	//KeepOldConnections by default is 24 hours
+	// KeepOldConnections by default is 24 hours.
 	if conf.KeepOldConnections == 0 {
 		conf.KeepOldConnections = 1440
 	}
-	//KeepInactiveConnections by default is 72 hours
+	// KeepInactiveConnections by default is 72 hours.
 	if conf.KeepInactiveConnections == 0 {
 		conf.KeepInactiveConnections = 4320
 	}

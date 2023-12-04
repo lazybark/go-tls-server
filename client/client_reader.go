@@ -6,7 +6,7 @@ import (
 	"github.com/lazybark/go-tls-server/conn"
 )
 
-// Reader infinitely reads messages from opened connection
+// Reader infinitely reads messages from opened connection.
 func (c *Client) reader() {
 	for {
 		if c.conn.Closed() || c.Closed() {
@@ -20,7 +20,7 @@ func (c *Client) reader() {
 			return
 		}
 
-		//Check in case we read 0 bytes
+		// Check in case we read 0 bytes.
 		if n > 0 {
 			c.messageChan <- conn.NewMessage(c.conn, n, b)
 		}

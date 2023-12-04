@@ -13,7 +13,7 @@ import (
 
 // DialTo dials to specified server and port using cert if provided.
 // If cert is not provided and server has self-signed cert, DialTo will return
-// 'certificate signed by unknown authority' error
+// 'certificate signed by unknown authority' error.
 func (c *Client) DialTo(address string, port int, cert string) error {
 	var config tls.Config
 	if cert != "" {
@@ -33,12 +33,12 @@ func (c *Client) DialTo(address string, port int, cert string) error {
 		return fmt.Errorf("[Client] unable to dial to %s:%d: %w", address, port, err)
 	}
 
-	//We reset data in case client was used before
+	// We reset data in case client was used before.
 	c.connCount++
 	c.isClosed = false
 	c.isClosedWithError = false
 	c.host = address
-	//Clean stats in case DropOldStats is true
+	// Clean stats in case DropOldStats is true.
 	if c.conf.DropOldStats && c.connCount > 0 {
 		c.conn.DropOldStats()
 	}

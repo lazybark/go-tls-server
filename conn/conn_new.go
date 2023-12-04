@@ -10,7 +10,6 @@ import (
 )
 
 func NewConnection(ip net.Addr, conn net.Conn, t byte) (*Connection, error) {
-	//Make connection struct
 	c := new(Connection)
 	c.connectedAt = npt.Now()
 	c.lastAct = c.connectedAt
@@ -31,5 +30,4 @@ func NewConnection(ip net.Addr, conn net.Conn, t byte) (*Connection, error) {
 	c.SetMessageTerminator(t)
 
 	return c, nil
-
 }

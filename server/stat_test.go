@@ -55,7 +55,7 @@ func TestStatistic(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 3, connections)
 
-	//Adding negative does nothing
+	// Adding negative does nothing.
 	e3 := -15
 	r3 := -44
 	s3 := -72
@@ -76,7 +76,7 @@ func TestStatistic(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 3, connections)
 
-	//Error if stat doesn't exist for the day
+	// Error if stat doesn't exist for the day.
 	now = time.Now().AddDate(1, 0, 0)
 	sentBytes, recievedBytes, errs, err = srv.Stats(now.Year(), int(now.Month()), now.Day())
 	assert.Equal(t, true, errors.Is(ErrNoStatForTheDay, err))

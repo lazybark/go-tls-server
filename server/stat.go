@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Stat holds server statistic
+// Stat holds server statistic.
 type Stat struct {
 	received int
 	sent     int
@@ -21,9 +21,9 @@ func getStatKey() string {
 	return fmt.Sprintf(statKeyPattern, now.Year(), now.Month(), now.Day())
 }
 
-// Stats returns server stats for specified day or error in case date is not in stat
+// Stats returns server stats for specified day or error in case date is not in stat.
 func (s *Server) StatsOverall() (sentBytes, receivedBytes, errors int, err error) {
-	//Right now err is not used - added for compatibility for future
+	// Right now err is not used - added for compatibility for future.
 
 	s.statMutex.Lock()
 	defer s.statMutex.Unlock()
@@ -35,7 +35,7 @@ func (s *Server) StatsOverall() (sentBytes, receivedBytes, errors int, err error
 	return
 }
 
-// Stats returns server stats for specified day or error in case date is not in stat
+// Stats returns server stats for specified day or error in case date is not in stat.
 func (s *Server) Stats(y int, m int, d int) (sentBytes, receivedBytes, errors int, err error) {
 	date := fmt.Sprintf(statKeyPattern, y, m, d)
 
@@ -50,9 +50,9 @@ func (s *Server) Stats(y int, m int, d int) (sentBytes, receivedBytes, errors in
 	return
 }
 
-// StatsConnections returns statistic about current connections
+// StatsConnections returns statistic about current connections/
 func (s *Server) StatsConnections() (connections int, err error) {
-	//Right now err is not used - added for compatibility for future
+	// Right now err is not used - added for compatibility for future.
 	s.connPoolMutex.Lock()
 	connections = len(s.connPool)
 	s.connPoolMutex.Unlock()
@@ -60,7 +60,7 @@ func (s *Server) StatsConnections() (connections int, err error) {
 	return
 }
 
-// addRecBytes adds bytes to stat of current day
+// addRecBytes adds bytes to stat of current day.
 func (s *Server) addRecBytes(n int) {
 	if n < 0 {
 		return
@@ -80,7 +80,7 @@ func (s *Server) addRecBytes(n int) {
 
 }
 
-// addSentBytes adds bytes to stat of current day
+// addSentBytes adds bytes to stat of current day.
 func (s *Server) addSentBytes(n int) {
 	if n < 0 {
 		return
@@ -99,7 +99,7 @@ func (s *Server) addSentBytes(n int) {
 	s.statOverall.sent += n
 }
 
-// addErrors adds bytes to stat of current day
+// addErrors adds bytes to stat of current day.
 func (s *Server) addErrors(n int) {
 	if n < 0 {
 		return
@@ -118,13 +118,13 @@ func (s *Server) addErrors(n int) {
 	s.statOverall.errors += n
 }
 
-// StartedAt returns starting time
+// StartedAt returns starting time.
 func (s *Server) StartedAt() time.Time { return s.timeStart }
 
-// Online returns time online
+// Online returns time online.
 func (s *Server) Online() time.Duration { return time.Since(s.timeStart) }
 
-// ActiveConnetions returns number of active connections
+// ActiveConnetions returns number of active connections.
 func (s *Server) ActiveConnetions() int {
 	a := 0
 	for _, c := range s.connPool {

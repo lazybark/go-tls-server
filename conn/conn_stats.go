@@ -2,7 +2,7 @@ package conn
 
 import "time"
 
-// Stats returns Connection stats
+// Stats returns Connection stats.
 func (c *Connection) Stats() (sent, received, errors int) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -10,7 +10,7 @@ func (c *Connection) Stats() (sent, received, errors int) {
 	return c.bs, c.br, c.errors
 }
 
-// DropOldStats sets bytes received, sent and error count to zero
+// DropOldStats sets bytes received, sent and error count to zero.
 func (c *Connection) DropOldStats() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -20,10 +20,10 @@ func (c *Connection) DropOldStats() {
 	c.errors = 0
 }
 
-// ConnectedAt returns time the connection was init
+// ConnectedAt returns time the connection was init.
 func (c *Connection) ConnectedAt() time.Time { return c.connectedAt.Time() }
 
-// ConnectedAt returns time the connection was init
+// ConnectedAt returns time the connection was init.
 func (c *Connection) ClosedAt() time.Time { return c.closedAt.Time() }
 
 func (c *Connection) SetLastAct() {
@@ -33,7 +33,7 @@ func (c *Connection) SetLastAct() {
 	c.lastAct.ToNow()
 }
 
-// ConnectedAt returns time the connection was init
+// ConnectedAt returns time the connection was init.
 func (c *Connection) LastAct() time.Time {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -41,7 +41,7 @@ func (c *Connection) LastAct() time.Time {
 	return c.lastAct.Time()
 }
 
-// Online returns duration of the connection
+// Online returns duration of the connection.
 func (c *Connection) Online() time.Duration {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -53,7 +53,7 @@ func (c *Connection) Online() time.Duration {
 	return time.Since(c.ConnectedAt())
 }
 
-// AddRecBytes adds number to count of total received bytes
+// AddRecBytes adds number to count of total received bytes.
 func (c *Connection) AddRecBytes(n int) {
 	if n < 0 {
 		return
@@ -65,7 +65,7 @@ func (c *Connection) AddRecBytes(n int) {
 	c.br += n
 }
 
-// AddSentBytes adds number to count of total sent bytes
+// AddSentBytes adds number to count of total sent bytes.
 func (c *Connection) AddSentBytes(n int) {
 	if n < 0 {
 		return
@@ -77,7 +77,7 @@ func (c *Connection) AddSentBytes(n int) {
 	c.bs += n
 }
 
-// AddErrors adds number to count of total errors
+// AddErrors adds number to count of total errors.
 func (c *Connection) AddErrors(n int) {
 	if n < 0 {
 		return

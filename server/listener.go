@@ -10,7 +10,7 @@ import (
 	"github.com/lazybark/go-tls-server/conn"
 )
 
-// Listen runs listener interface implementations and accepts connections
+// Listen runs listener interface implementations and accepts connections.
 func (s *Server) Listen(port string) {
 	l, err := tls.Listen("tcp", ":"+port, s.tlsConfig)
 	if err != nil {
@@ -27,13 +27,12 @@ func (s *Server) Listen(port string) {
 			return
 
 		default:
-			//Accept the connection
+			// Accept the connection.
 			tlsConn, err := l.Accept()
 
-			//The problem is that a listener can be closed during the listening. Then we get net.ErrClosed.
-			//In this case we always ignore it, because doesn't matter why it's closed - this function is not for err processing
-			//Error was handled somewhere else already. Or server was simply terminated
-			//TO DO: think if there is more graceful way than errors.Is
+			// The problem is that a listener can be closed during the listening. Then we get net.ErrClosed.
+			// In this case we always ignore it, because doesn't matter why it's closed: this function is not for err processing.
+			// Error was handled somewhere else already. Or server was simply terminated.
 			if err != nil {
 				if errors.Is(err, net.ErrClosed) {
 					continue
@@ -43,7 +42,7 @@ func (s *Server) Listen(port string) {
 				}
 			}
 
-			//Just a precaution to avoid nil pointer dereference
+			// Just a precaution to avoid nil pointer dereference/
 			if tlsConn == nil {
 				continue
 			}
@@ -53,11 +52,11 @@ func (s *Server) Listen(port string) {
 				s.errChan <- fmt.Errorf("[Server][Listen] error making connection for %v: %w", tlsConn.RemoteAddr(), err)
 			}
 
-			//Add to pool
+			// Add to pool.
 			s.addToPool(c)
-			//Notify outer routine
+			// Notify outer routine.
 			s.connChan <- c
-			//Wait for new messages
+			// Wait for new messages.
 			go s.receive(c)
 		}
 	}

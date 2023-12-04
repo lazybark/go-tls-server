@@ -14,7 +14,7 @@ func (s *Server) Stop() error {
 	}
 	s.connPoolMutex.Unlock()
 
-	//At this point no routine will be left that can write in these channels
+	// At this point no routine will be left that can write in these channels.
 	close(s.connChan)
 	close(s.errChan)
 
