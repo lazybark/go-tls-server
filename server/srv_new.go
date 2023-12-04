@@ -59,14 +59,7 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	tlsConfig = &tls.Config{Certificates: []tls.Certificate{certificate}}
 	s.tlsConfig = tlsConfig
 
-	if conf.HttpStatMode {
-		if conf.HttpStatAddr == "" {
-			conf.HttpStatAddr = "localhost:3939"
-		}
-		s.resolver = chi.NewRouter()
-	}
-
-	//Start server admin
+	// Start server admin.
 	go s.adminRoutine()
 
 	return s, nil

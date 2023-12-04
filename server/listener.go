@@ -19,13 +19,6 @@ func (s *Server) Listen(port string) {
 
 	s.listener = l
 
-	//Start HTTP server
-	if s.sConfig.HttpStatMode {
-		s.setHTTPRoutes()
-
-		go s.serveHTTP()
-	}
-
 	for {
 
 		select {

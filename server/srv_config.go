@@ -1,20 +1,8 @@
 package server
 
 type Config struct {
-	//HttpStatMode allows connections to HttpStatAddr to see realtime server statistic.
-	//
-	//Be sure that HttpStatAddr is hidden from external connections by your firewall!
-	HttpStatMode bool
-
-	//HttpStatAddr is the address & port where server should serve stat data if HttpStatMode = true
-	//
-	//Default: localhost:3939
-	//
-	//Be sure that HttpStatAddr is hidden from external connections by your firewall!
-	HttpStatAddr string
-
-	//SuppressErrors prevents server from sending errors into ErrChan.
-	//Does not include fatal errors during startup.
+	// SuppressErrors prevents server from sending errors into ErrChan.
+	// Does not include fatal errors during startup.
 	SuppressErrors bool
 
 	//MaxMessageSize sets max length of one message in bytes.
