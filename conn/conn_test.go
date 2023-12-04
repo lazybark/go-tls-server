@@ -1,4 +1,4 @@
-package conn
+package conn_test
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/lazybark/go-helpers/mock"
+	"github.com/lazybark/go-tls-server/conn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +19,7 @@ func TestConnectionCorrectByteSending(t *testing.T) {
 	send := "Hello there, General Kenobi!"
 	tlsConn := &mock.MockTLSConnection{}
 
-	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
 
 	_, _ = cn.SendByte([]byte(send))
@@ -34,7 +35,7 @@ func TestConnectionCorrectStringSending(t *testing.T) {
 	send := "Hello there, General Kenobi!"
 	tlsConn := &mock.MockTLSConnection{}
 
-	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
 
 	_, _ = cn.SendString(send)
@@ -54,7 +55,7 @@ func TestConnectionCorrectReading(t *testing.T) {
 		},
 	}
 
-	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
 
 	buffer := 5
@@ -80,14 +81,14 @@ func TestConnectionReadingTooLargeMessage(t *testing.T) {
 		},
 	}
 
-	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
 
 	//Small buffer will result in double buffer reads until max can be checked
 	buffer := 5
 	maxSize := 5
 	read, count, err := cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
-	assert.Equal(t, true, errors.Is(err, ErrMessageSizeLimit))
+	assert.Equal(t, true, errors.Is(err, conn.ErrMessageSizeLimit))
 
 	assert.Equal(t, "", string(read)) //Returning nothing
 	assert.Equal(t, buffer*2, count)  //Reading performed two times before got more than allowed
@@ -107,14 +108,14 @@ func TestConnectionReadingTooLargeMessageTooLargeBuffer(t *testing.T) {
 		},
 	}
 
-	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
 
 	//buffer > message length will result in error after whole message read
 	buffer := 50
 	maxSize := 5
 	read, count, err := cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
-	assert.Equal(t, true, errors.Is(err, ErrMessageSizeLimit))
+	assert.Equal(t, true, errors.Is(err, conn.ErrMessageSizeLimit))
 
 	assert.Equal(t, "", string(read))              //Returning nothing
 	assert.Equal(t, len(tlsConn.MWR.Bytes), count) //Larger buffer reads whole message before there is an error
@@ -134,7 +135,7 @@ func TestConnectionReadingClosedByContext(t *testing.T) {
 		},
 	}
 
-	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
 
 	buffer := 5
@@ -144,7 +145,7 @@ func TestConnectionReadingClosedByContext(t *testing.T) {
 
 	go func() {
 		time.Sleep(time.Second * 3)
-		cn.cancel()
+		cn.CancelCtx()
 	}()
 
 	read, count, err = cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
@@ -167,7 +168,7 @@ func TestConnectionReadingClose(t *testing.T) {
 		},
 	}
 
-	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
 
 	buffer := 5
@@ -196,7 +197,7 @@ func TestConnectionReadingClose(t *testing.T) {
 
 	//And read over already closed connection
 	read, count, err = cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
-	assert.True(t, errors.Is(err, ErrReaderAlreadyClosed))
+	assert.True(t, errors.Is(err, conn.ErrReaderAlreadyClosed))
 	assert.Empty(t, read)
 	assert.Empty(t, count)
 }
@@ -209,14 +210,14 @@ func TestConnectionReadingEOF(t *testing.T) {
 		},
 	}
 
-	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
 
 	buffer := 50
 	maxSize := 5
 
 	read, count, err := cn.ReadWithContext(buffer, maxSize, testMessageTerminator[0])
-	assert.Equal(t, true, errors.Is(err, ErrStreamClosed))
+	assert.Equal(t, true, errors.Is(err, conn.ErrStreamClosed))
 
 	assert.Equal(t, "", string(read))
 	assert.Equal(t, 0, count)
@@ -235,20 +236,20 @@ func TestConnectionReadingStats(t *testing.T) {
 		},
 	}
 
-	cn, err := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	require.NoError(t, err)
 
-	cn.br = 3333
-	cn.errors = 15
-	cn.bs = 8374
+	cn.AddRecBytes(3333)
+	cn.AddErrors(15)
+	cn.AddSentBytes(8374)
 
 	sent, rec, errs := cn.Stats()
-	assert.Equal(t, cn.br, rec)
-	assert.Equal(t, cn.errors, errs)
-	assert.Equal(t, cn.bs, sent)
-	assert.Equal(t, cn.br, 3333)
-	assert.Equal(t, cn.errors, 15)
-	assert.Equal(t, cn.bs, 8374)
+	assert.Equal(t, cn.Received(), rec)
+	assert.Equal(t, cn.Errors(), errs)
+	assert.Equal(t, cn.Sent(), sent)
+	assert.Equal(t, cn.Received(), 3333)
+	assert.Equal(t, cn.Errors(), 15)
+	assert.Equal(t, cn.Sent(), 8374)
 
 	cn.DropOldStats()
 

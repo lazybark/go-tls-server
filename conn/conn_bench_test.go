@@ -1,4 +1,4 @@
-package conn
+package conn_test
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/lazybark/go-helpers/gen"
 	"github.com/lazybark/go-helpers/mock"
+	"github.com/lazybark/go-tls-server/conn"
 )
 
 var (
@@ -20,13 +21,13 @@ func FailTest(b *testing.B, err error) {
 	}
 }
 
-// Small buffer affects reading speed
+// Small buffer affects reading speed.
 func BenchmarkConnectionCorrectReading(b *testing.B) {
 	tlsConn := &mock.MockTLSConnection{
 		MWR: mock.MockWriteReader{},
 	}
 
-	cn, _ := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, _ := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 
 	bLens := []int{5, 128, 1024}
 	maxSize := 5120
@@ -56,7 +57,7 @@ func BenchmarkConnectionCorrectByteSending(b *testing.B) {
 		send = append(send, s)
 	}
 
-	cn, _ := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, _ := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	for _, str := range send {
 		//Sending bytes, so counting also bytes, not chars
 		b.Run(fmt.Sprintf("input_size_%d", len(str)), func(b *testing.B) {
@@ -78,7 +79,7 @@ func BenchmarkConnectionCorrectStringSending(b *testing.B) {
 		send = append(send, s)
 	}
 
-	cn, _ := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, _ := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	for _, str := range send {
 		//Sending bytes, so counting also bytes, not chars (SendString calls to SendByte)
 		b.Run(fmt.Sprintf("input_size_%d", len(str)), func(b *testing.B) {
@@ -92,21 +93,21 @@ func BenchmarkConnectionCorrectStringSending(b *testing.B) {
 func BenchmarkConnectionStatsLastAct(b *testing.B) {
 	tlsConn := &mock.MockTLSConnection{}
 
-	cn, _ := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, _ := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 
 	for i := 0; i < b.N; i++ {
-		cn.setLastAct()
+		cn.SetLastAct()
 	}
 }
 
 func BenchmarkConnectionStatsAddRecBytes(b *testing.B) {
 	tlsConn := &mock.MockTLSConnection{}
 
-	cn, _ := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, _ := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	for n := 256; n <= 1024; n += 256 {
 		b.Run(fmt.Sprintf("size_%d", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				cn.addRecBytes(n)
+				cn.AddRecBytes(n)
 			}
 		})
 	}
@@ -115,11 +116,11 @@ func BenchmarkConnectionStatsAddRecBytes(b *testing.B) {
 func BenchmarkConnectionStatsAddSentBytes(b *testing.B) {
 	tlsConn := &mock.MockTLSConnection{}
 
-	cn, _ := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, _ := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	for n := 256; n <= 1024; n += 256 {
 		b.Run(fmt.Sprintf("size_%d", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				cn.addSentBytes(n)
+				cn.AddSentBytes(n)
 			}
 		})
 	}
@@ -128,11 +129,11 @@ func BenchmarkConnectionStatsAddSentBytes(b *testing.B) {
 func BenchmarkConnectionStatsAddErrors(b *testing.B) {
 	tlsConn := &mock.MockTLSConnection{}
 
-	cn, _ := NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
+	cn, _ := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, '\n')
 	for n := 256; n <= 1024; n += 256 {
 		b.Run(fmt.Sprintf("size_%d", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				cn.addErrors(n)
+				cn.AddErrors(n)
 			}
 		})
 	}
