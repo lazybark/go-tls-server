@@ -88,3 +88,27 @@ func (c *Connection) AddErrors(n int) {
 
 	c.errors += n
 }
+
+// Sent returns total count of bytes sent into connection.
+func (c *Connection) Sent() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	return c.bs
+}
+
+// Received returns total count of bytes received from connection.
+func (c *Connection) Received() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	return c.br
+}
+
+// Sent returns total count of bytes sent into connection.
+func (c *Connection) Errors() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	return c.errors
+}
