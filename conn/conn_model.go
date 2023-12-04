@@ -71,3 +71,6 @@ func (c *Connection) MessageChanRead() <-chan *Message { return c.messageChan }
 
 // MessageChanWrite returns connection's message channel to write only
 func (c *Connection) MessageChanWrite() chan<- *Message { return c.messageChan }
+
+// CancelCtx cancels the connection context.
+func (c *Connection) CancelCtx() { c.cancel() }

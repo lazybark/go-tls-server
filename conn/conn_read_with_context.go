@@ -29,8 +29,8 @@ func (c *Connection) ReadWithContext(buffer, maxSize int, terminator byte) ([]by
 	}
 	//Length of current read
 	read := 0
-	defer func(read *int) { c.addRecBytes(*read) }(&read)
-	//Read buffer with server-defined size
+	defer func(read *int) { c.AddRecBytes(*read) }(&read)
+	// Read buffer with server-defined size.
 	b := make([]byte, buffer)
 	for {
 		select {
@@ -50,17 +50,17 @@ func (c *Connection) ReadWithContext(buffer, maxSize int, terminator byte) ([]by
 
 					return nil, read, nil
 				}
-				c.addErrors(1)
+				c.AddErrors(1)
 				//The connecton is not closed yet in this case!
 				//Client code should decide if they want to close or try to read next bytes
 				return nil, read, fmt.Errorf("[ReadWithContext] reading error: %w", err)
 			}
 			read += n
 
-			c.setLastAct()
+			c.SetLastAct()
 
 			if maxSize > 0 && read > maxSize {
-				c.addErrors(1)
+				c.AddErrors(1)
 				return nil, read, fmt.Errorf("[ReadWithContext] %w (read %v of max %v)", ErrMessageSizeLimit, read, maxSize)
 			}
 			//We check every byte searching for terminator

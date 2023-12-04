@@ -7,11 +7,11 @@ func (c *Connection) SendByte(b []byte) (int, error) {
 	b = append(b, c.messageTerminator)
 	bs, err := c.tlsConn.Write(b)
 
-	c.addSentBytes(bs)
-	c.setLastAct()
+	c.AddSentBytes(bs)
+	c.SetLastAct()
 
 	if err != nil {
-		c.addErrors(1)
+		c.AddErrors(1)
 
 		return bs, fmt.Errorf("[SendByte] error writing response: %w", err)
 	}

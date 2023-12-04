@@ -26,7 +26,7 @@ func (c *Connection) ConnectedAt() time.Time { return c.connectedAt.Time() }
 // ConnectedAt returns time the connection was init
 func (c *Connection) ClosedAt() time.Time { return c.closedAt.Time() }
 
-func (c *Connection) setLastAct() {
+func (c *Connection) SetLastAct() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -49,11 +49,12 @@ func (c *Connection) Online() time.Duration {
 	if c.isClosed {
 		return c.ClosedAt().Sub(c.ConnectedAt())
 	}
+
 	return time.Since(c.ConnectedAt())
 }
 
-// addRecBytes adds number to count of total received bytes
-func (c *Connection) addRecBytes(n int) {
+// AddRecBytes adds number to count of total received bytes
+func (c *Connection) AddRecBytes(n int) {
 	if n < 0 {
 		return
 	}
@@ -64,8 +65,8 @@ func (c *Connection) addRecBytes(n int) {
 	c.br += n
 }
 
-// addSentBytes adds number to count of total sent bytes
-func (c *Connection) addSentBytes(n int) {
+// AddSentBytes adds number to count of total sent bytes
+func (c *Connection) AddSentBytes(n int) {
 	if n < 0 {
 		return
 	}
@@ -76,8 +77,8 @@ func (c *Connection) addSentBytes(n int) {
 	c.bs += n
 }
 
-// addErrors adds number to count of total errors
-func (c *Connection) addErrors(n int) {
+// AddErrors adds number to count of total errors
+func (c *Connection) AddErrors(n int) {
 	if n < 0 {
 		return
 	}
