@@ -6,13 +6,12 @@ import (
 	"github.com/lazybark/go-helpers/npt"
 )
 
-// Closed returns true if the connection was closed
-func (c *Connection) Closed() (closed bool) {
-	c.mu.RLock()
-	closed = c.isClosed
-	c.mu.RUnlock()
+// Closed returns true if the connection was closed.
+func (c *Connection) Closed() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	return
+	return c.isClosed
 }
 
 // Close forsibly closes the connection. Active reader may still return bytes read between message start and connection close.
@@ -31,12 +30,11 @@ func (c *Connection) Close() error {
 // close marks connection as closed, but TLS will be closed by reader
 func (c *Connection) close() error {
 	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	c.cancel()
 	c.isClosed = true
 	c.closedAt = npt.Now()
-
-	c.mu.Unlock()
 
 	return nil
 }
