@@ -17,16 +17,12 @@ Connection benchmarks are located at [v3/conn/conn_bench_test.go](https://github
 Cert & key for **Server** & **Client** can be generated via [go-cert-generator](https://github.com/lazybark/go-cert-generator).
 
 **Server** parameters:
-* `HttpStatMode (bool)` - allows connections to `HttpStatAddr` to see realtime server statistic
-* `HttpStatAddr (string)` - address & port where server should serve stat data if `HttpStatMode = true` (Default: localhost:3939)
 * `SuppressErrors (bool)` - prevents **Server** from sending errors into `ErrChan`
 * `MaxMessageSize (int)` - sets max length of one message in bytes
 * `MessageTerminator (byte)` - sets byte value that marks message end of the message in stream
 * `BufferSize (int)` - regulates buffer length to read incoming message
 * `KeepOldConnections (int)` - prevents **Server** from dropping closed connection for N minutes after it has been closed
 * `KeepInactiveConnections (int)` - makes **Server** close connection that had no activity for N mins
-
-`HttpStatMode` & `HttpStatAddr` should be inaccessible from public network.
 
 **Client** parameters:
 * `SuppressErrors (bool)` - prevents **Client** from sending errors into `ErrChan`
@@ -72,8 +68,6 @@ Keep in mind: for server to gather stat data, you need to call `server.SendByte(
 
 But it doesn't bother client: it has only one connection and always returns its stats.
 
-Also, server can show statistic via HTTP requests. Use `HttpStatMode: true` and `HttpStatAddr: "DOMAIN:PORT"` in config to enable. But be sure that this endpoint is available only from your internal network or is closed by firewall.
-
 ## Basic usage
 Basic usage is to use **Server** & **Client** behind an interface or as part of bigger struct. Both return new connections and messages via channels to external calling code which means you can create routines to process new connections and messages in them (as **Server**) or to create separate connections and communicate with **Server** (as **Client**).
 
@@ -92,7 +86,7 @@ import (
 )
 
 func main() {
-	conf := &server.Config{KeepOldConnections: 1, HttpStatMode: true, HttpStatAddr: "localhost:8080"}
+	conf := &server.Config{KeepOldConnections: 1}
 	s, err := server.New("localhost", `certs/cert.pem`, `certs/key.pem`, conf)
 	if err != nil {
 		log.Fatal(err)
