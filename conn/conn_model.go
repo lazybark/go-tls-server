@@ -2,10 +2,15 @@ package conn
 
 import (
 	"context"
+	"errors"
 	"net"
 	"sync"
 
 	"github.com/lazybark/go-helpers/npt"
+)
+
+var (
+	ErrConnectionClosed = errors.New("connection closed")
 )
 
 // Connection represents incoming client connection.
@@ -66,8 +71,21 @@ func (c *Connection) ID() string { return c.id }
 // SetMessageTerminator sets byte that will be used as message terminator.
 func (c *Connection) SetMessageTerminator(t byte) { c.messageTerminator = t }
 
-// MessageChanRead returns connection's message channel to read only.
-func (c *Connection) MessageChanRead() <-chan *Message { return c.messageChan }
+// Next returns true if connection is open and able to receive new messages.
+func (c *Connection) Next() bool {
+	return !c.isClosed
+}
+
+// GetMessage returns new message or error. Code will be locked until new message appears
+// or connection is closed. The only possible error is ErrConnectionClosed.
+func (c *Connection) GetMessage() (*Message, error) {
+	message, ok := <-c.messageChan
+	if !ok {
+		return nil, ErrConnectionClosed
+	}
+
+	return message, nil
+}
 
 // MessageChanWrite returns connection's message channel to write only.
 func (c *Connection) MessageChanWrite() chan<- *Message { return c.messageChan }

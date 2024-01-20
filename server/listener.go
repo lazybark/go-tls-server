@@ -4,62 +4,65 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 
 	"github.com/lazybark/go-tls-server/conn"
 )
 
 // Listen runs listener interface implementations and accepts connections.
-func (s *Server) Listen(port string) { //nolint:cyclop // in TODOs
+func (s *Server) Listen(port string) error { //nolint:cyclop // in TODOs
 	listener, err := tls.Listen("tcp", ":"+port, s.tlsConfig)
 	if err != nil {
-		log.Fatal(s.FormatError(fmt.Errorf("[Listen] error listening: %w", err)))
+		return s.FormatError(fmt.Errorf("[Listen] error listening: %w", err))
 	}
 
 	s.SetActive(true)
 
 	s.listener = listener
 
-	for {
-		select {
-		case <-s.ctx.Done():
-			return
-		default:
-			// Accept the connection.
-			tlsConn, err := listener.Accept()
+	go func() {
+		for {
+			select {
+			case <-s.ctx.Done():
+				return
+			default:
+				// Accept the connection.
+				tlsConn, err := listener.Accept()
 
-			// The problem is that a listener can be closed during the listening. Then we get net.ErrClosed.
-			// In this case we always ignore it, because doesn't matter why it's closed: this function is not for err processing.
-			// Error was handled somewhere else already. Or server was simply terminated.
-			if err != nil {
-				if errors.Is(err, net.ErrClosed) {
+				// The problem is that a listener can be closed during the listening. Then we get net.ErrClosed.
+				// In this case we always ignore it, because doesn't matter why it's closed: this function is not for err processing.
+				// Error was handled somewhere else already. Or server was simply terminated.
+				if err != nil {
+					if errors.Is(err, net.ErrClosed) {
+						continue
+					}
+
+					if !s.sConfig.SuppressErrors {
+						s.errChan <- s.FormatError(fmt.Errorf("[Listen] error accepting connection: %w", err))
+					}
+				}
+
+				// Just a precaution to avoid nil pointer dereference.
+				if tlsConn == nil {
 					continue
 				}
 
-				if !s.sConfig.SuppressErrors {
-					s.errChan <- s.FormatError(fmt.Errorf("[Listen] error accepting connection: %w", err))
+				connection, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, s.sConfig.MessageTerminator)
+				if err != nil && !s.sConfig.SuppressErrors {
+					s.errChan <- s.FormatError(fmt.Errorf("[Listen] error making connection for %v: %w", tlsConn.RemoteAddr(), err))
 				}
-			}
 
-			// Just a precaution to avoid nil pointer dereference.
-			if tlsConn == nil {
-				continue
+				// Add to pool.
+				s.addToPool(connection)
+				// Notify outer routine.
+				s.connChan <- connection
+				// Wait for new messages.
+				go s.receive(connection)
 			}
-
-			connection, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, s.sConfig.MessageTerminator)
-			if err != nil && !s.sConfig.SuppressErrors {
-				s.errChan <- s.FormatError(fmt.Errorf("[Listen] error making connection for %v: %w", tlsConn.RemoteAddr(), err))
-			}
-
-			// Add to pool.
-			s.addToPool(connection)
-			// Notify outer routine.
-			s.connChan <- connection
-			// Wait for new messages.
-			go s.receive(connection)
 		}
-	}
+	}()
+
+	return nil
 }
 
 // receive endlessly reads incoming stream and delivers messages to receivers outside server routine.

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/lazybark/go-tls-server/server"
@@ -23,34 +24,41 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go tlsServer.Listen("5555")
-
-	for {
-		select {
-		case err, ok := <-tlsServer.ErrChan():
-			if !ok {
-				return
-			}
-
-			log.Println(err)
-
-		case conn, ok := <-tlsServer.ConnChan():
-			if !ok {
-				return
-			}
-
-			log.Println(conn.Address())
-
-			go func() {
-				for m := range conn.MessageChanRead() {
-					log.Println("Got message:", string(m.Bytes()))
-
-					err = tlsServer.SendString(conn, "Got ya!")
-					if err != nil {
-						log.Fatal(err)
-					}
-				}
-			}()
+	go func() {
+		err = tlsServer.Error()
+		if err != nil {
+			log.Fatal(err)
 		}
+	}()
+
+	err = tlsServer.Listen("5555")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for tlsServer.Next() {
+		connection, err := tlsServer.AcceptConnection()
+		if err != nil {
+			if !errors.Is(err, server.ErrServerClosed) {
+				log.Fatal(err)
+			}
+		}
+
+		go func() {
+			for connection.Next() {
+				message, err := connection.GetMessage()
+				if err != nil {
+					return
+				}
+
+				log.Println("Got message:", string(message.Bytes()))
+
+				err = tlsServer.SendString(connection, "Got ya!")
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+		}()
+
 	}
 }

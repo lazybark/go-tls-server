@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"sync"
@@ -10,6 +11,10 @@ import (
 
 	"github.com/lazybark/go-helpers/semver"
 	"github.com/lazybark/go-tls-server/conn"
+)
+
+var (
+	ErrServerClosed = errors.New("server is closed")
 )
 
 type Server struct {
@@ -73,11 +78,32 @@ func (s *Server) Version() semver.Ver { return s.ver }
 // Version returns app version string.
 func (s *Server) VersionString() string { return s.ver.String() }
 
-// ErrChan returns server error channel available to read only.
-func (s *Server) ErrChan() <-chan error { return s.errChan }
+// Error returns exactly one of server errors. Keep it running in separate routine to receive
+// all errors as they appear.
+func (s *Server) Error() error {
+	err, ok := <-s.errChan
+	if !ok {
+		return nil
+	}
 
-// ConnChan returns server new connections channel available to read only.
-func (s *Server) ConnChan() <-chan *conn.Connection { return s.connChan }
+	return err
+}
+
+// Next returns true if server is active and able to receive new connections.
+func (s *Server) Next() bool {
+	return s.IsActive()
+}
+
+// AcceptConnection returns new connection or error. Code will be locked until new connection appears
+// or server is stopped. The only possible error is ErrServerClosed.
+func (s *Server) AcceptConnection() (*conn.Connection, error) {
+	connection, ok := <-s.connChan
+	if !ok {
+		return nil, ErrServerClosed
+	}
+
+	return connection, nil
+}
 
 // FormatError adds server's error prefix to err.
 func (s *Server) FormatError(err error) error {
