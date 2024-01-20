@@ -41,7 +41,6 @@ func (c *Client) DialTo(address string, port int, cert string) error {
 	}
 
 	// We reset data in case client was used before.
-	c.connCount++
 	c.isClosed = false
 	c.isClosedWithError = false
 	c.host = address
@@ -56,6 +55,7 @@ func (c *Client) DialTo(address string, port int, cert string) error {
 	}
 
 	c.conn = cn
+	c.connCount++
 
 	go c.controller()
 	go c.reader()

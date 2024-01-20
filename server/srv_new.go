@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"sync"
@@ -11,7 +12,7 @@ import (
 )
 
 // New initializes server instance and makes it completely ready to listen for connections.
-func New(host string, cert string, key string, conf *Config) (*Server, error) { //nolint: funlen // false alarm
+func New(ctx context.Context, host string, cert string, key string, conf *Config) (*Server, error) { //nolint: funlen // false alarm
 	server := new(Server)
 	server.timeStart = time.Now()
 	server.host = host
@@ -30,6 +31,7 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) { 
 		Stable:      false,
 		ReleaseNote: "beta",
 	}
+	server.ctx = ctx
 
 	if conf == nil {
 		conf = new(Config)

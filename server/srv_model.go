@@ -80,7 +80,13 @@ func (s *Server) ErrChan() <-chan error { return s.errChan }
 func (s *Server) ConnChan() <-chan *conn.Connection { return s.connChan }
 
 // FormatError adds server's error prefix to err.
-func (s *Server) FormatError(err error) error { return fmt.Errorf("%s: %w", s.errorPrefix, err) }
+func (s *Server) FormatError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	return fmt.Errorf("%s: %w", s.errorPrefix, err)
+}
 
 // SetActive sets server status to the value of active.
 func (s *Server) SetActive(active bool) {

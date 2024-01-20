@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/lazybark/go-tls-server/server"
@@ -17,7 +18,7 @@ func main() {
 		ErrorPrefix:             "MY_SERVER",
 	}
 
-	tlsServer, err := server.New("localhost", `certs/cert.pem`, `certs/key.pem`, conf)
+	tlsServer, err := server.New(context.Background(), "localhost", `certs/cert.pem`, `certs/key.pem`, conf)
 	if err != nil {
 		log.Fatal(err)
 	}
