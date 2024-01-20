@@ -21,4 +21,9 @@ type Config struct {
 
 	// DropOldStats = true will make client to set all sent/received bytes & errors to zero before opening new connection.
 	DropOldStats bool
+
+	// errorPrefix is used as prefix to all errors to identify specific instance of client.
+	//
+	// Default: "TLS_CLIENT".
+	ErrorPrefix string
 }

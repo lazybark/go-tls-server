@@ -2,6 +2,7 @@ package conn
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"sync"
 
@@ -9,25 +10,26 @@ import (
 	"github.com/lazybark/go-helpers/npt"
 )
 
-func NewConnection(ip net.Addr, conn net.Conn, t byte) (*Connection, error) {
-	c := new(Connection)
-	c.connectedAt = npt.Now()
-	c.lastAct = c.connectedAt
-	c.messageChan = make(chan *Message)
-	c.mu = &sync.RWMutex{}
+func NewConnection(address net.Addr, conn net.Conn, terminator byte) (*Connection, error) {
+	connection := new(Connection)
+	connection.connectedAt = npt.Now()
+	connection.lastAct = connection.connectedAt
+	connection.messageChan = make(chan *Message)
+	connection.mu = &sync.RWMutex{}
 
-	id, err := uuid.NewV4()
+	connID, err := uuid.NewV4()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[NewConnection] %w", err)
 	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 
-	c.id = id.String()
-	c.addr = ip
-	c.tlsConn = conn
-	c.cancel = cancel
-	c.ctx = ctx
-	c.SetMessageTerminator(t)
+	connection.id = connID.String()
+	connection.addr = address
+	connection.tlsConn = conn
+	connection.cancel = cancel
+	connection.ctx = ctx
+	connection.SetMessageTerminator(terminator)
 
-	return c, nil
+	return connection, nil
 }

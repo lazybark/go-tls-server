@@ -3,7 +3,7 @@ package conn
 import "time"
 
 // Stats returns Connection stats.
-func (c *Connection) Stats() (sent, received, errors int) {
+func (c *Connection) Stats() (int, int, int) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -54,39 +54,39 @@ func (c *Connection) Online() time.Duration {
 }
 
 // AddRecBytes adds number to count of total received bytes.
-func (c *Connection) AddRecBytes(n int) {
-	if n < 0 {
+func (c *Connection) AddRecBytes(count int) {
+	if count < 0 {
 		return
 	}
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.br += n
+	c.br += count
 }
 
 // AddSentBytes adds number to count of total sent bytes.
-func (c *Connection) AddSentBytes(n int) {
-	if n < 0 {
+func (c *Connection) AddSentBytes(count int) {
+	if count < 0 {
 		return
 	}
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.bs += n
+	c.bs += count
 }
 
 // AddErrors adds number to count of total errors.
-func (c *Connection) AddErrors(n int) {
-	if n < 0 {
+func (c *Connection) AddErrors(count int) {
+	if count < 0 {
 		return
 	}
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.errors += n
+	c.errors += count
 }
 
 // Sent returns total count of bytes sent into connection.

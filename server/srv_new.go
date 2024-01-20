@@ -1,36 +1,40 @@
 package server
 
 import (
-	"context"
 	"crypto/tls"
 	"fmt"
 	"sync"
 	"time"
 
+	"github.com/lazybark/go-helpers/semver"
 	"github.com/lazybark/go-tls-server/conn"
 )
 
 // New initializes server instance and makes it completely ready to listen for connections.
-func New(host string, cert string, key string, conf *Config) (*Server, error) {
-	s := new(Server)
-	s.timeStart = time.Now()
-	s.host = host
-	s.errChan = make(chan error)
-	s.serverDoneChan = make(chan bool)
-	s.connChan = make(chan *conn.Connection)
-	s.connPool = make(map[string]*conn.Connection)
-	s.stat = make(map[string]Stat)
-	s.statOverall = new(Stat)
-	s.connPoolMutex = sync.RWMutex{}
-	s.ver = ver
-
-	ctx, cancel := context.WithCancel(context.Background())
-	s.cancel = cancel
-	s.ctx = ctx
+func New(host string, cert string, key string, conf *Config) (*Server, error) { //nolint: funlen // false alarm
+	server := new(Server)
+	server.timeStart = time.Now()
+	server.host = host
+	server.errChan = make(chan error)
+	server.serverDoneChan = make(chan bool)
+	server.connChan = make(chan *conn.Connection)
+	server.connPool = make(map[string]*conn.Connection)
+	server.stat = make(map[string]Stat)
+	server.statOverall = new(Stat)
+	server.connPoolMutex = sync.RWMutex{}
+	server.mu = new(sync.Mutex)
+	server.ver = semver.Ver{ //nolint:exhaustruct // false alarm
+		Major:       3, //nolint:gomnd // false alarm
+		Minor:       2, //nolint:gomnd // false alarm
+		Patch:       0,
+		Stable:      false,
+		ReleaseNote: "beta",
+	}
 
 	if conf == nil {
-		conf = &Config{}
+		conf = new(Config)
 	}
+
 	// Default terminator is the newline.
 	if conf.MessageTerminator == 0 {
 		conf.MessageTerminator = '\n'
@@ -40,26 +44,34 @@ func New(host string, cert string, key string, conf *Config) (*Server, error) {
 	if conf.BufferSize == 0 {
 		conf.BufferSize = 128
 	}
+
 	// KeepOldConnections by default is 24 hours.
 	if conf.KeepOldConnections == 0 {
 		conf.KeepOldConnections = 1440
 	}
+
 	// KeepInactiveConnections by default is 72 hours.
 	if conf.KeepInactiveConnections == 0 {
 		conf.KeepInactiveConnections = 4320
 	}
-	s.sConfig = conf
 
-	var tlsConfig *tls.Config
+	if conf.ErrorPrefix == "" {
+		conf.ErrorPrefix = "TLS_SERVER"
+	}
+
+	server.sConfig = conf
+
 	certificate, err := tls.LoadX509KeyPair(cert, key)
 	if err != nil {
-		return nil, fmt.Errorf("[Server] error getting key pair: %w", err)
+		return nil, server.FormatError(fmt.Errorf("error getting key pair: %w", err))
 	}
-	tlsConfig = &tls.Config{Certificates: []tls.Certificate{certificate}}
-	s.tlsConfig = tlsConfig
+
+	server.tlsConfig = new(tls.Config)
+	server.tlsConfig.Certificates = []tls.Certificate{certificate}
+	server.tlsConfig.MinVersion = tls.VersionTLS12
 
 	// Start server admin.
-	go s.adminRoutine()
+	go server.adminRoutine()
 
-	return s, nil
+	return server, nil
 }

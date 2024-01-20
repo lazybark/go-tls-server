@@ -8,17 +8,16 @@ import (
 )
 
 func GetEmptyTestServer() *Server {
-	s := new(Server)
-	s.timeStart = time.Now()
-	s.host = "localhost"
-	s.errChan = make(chan error)
-	s.serverDoneChan = make(chan bool)
-	s.connChan = make(chan *conn.Connection)
-	s.connPool = make(map[string]*conn.Connection)
-	s.stat = make(map[string]Stat)
-	s.statOverall = &Stat{}
-	s.connPoolMutex = sync.RWMutex{}
-	s.ver = ver
+	server := new(Server)
+	server.timeStart = time.Now()
+	server.host = "localhost"
+	server.errChan = make(chan error)
+	server.serverDoneChan = make(chan bool)
+	server.connChan = make(chan *conn.Connection)
+	server.connPool = make(map[string]*conn.Connection)
+	server.stat = make(map[string]Stat)
+	server.statOverall = new(Stat)
+	server.connPoolMutex = sync.RWMutex{}
 
-	return s
+	return server
 }

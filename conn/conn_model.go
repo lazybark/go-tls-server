@@ -32,7 +32,7 @@ type Connection struct {
 	lastAct npt.NPT
 
 	// ctx is the connection context.
-	ctx    context.Context
+	ctx    context.Context //nolint:containedctx // In TODOs
 	cancel context.CancelFunc
 
 	// bytesLeft holds extra bytes that were read from stream after terminator occurred, but end of buffer was not reached.
@@ -60,8 +60,8 @@ type Connection struct {
 // Address returns remote address of client.
 func (c *Connection) Address() net.Addr { return c.addr }
 
-// Id returns connection ID in pool.
-func (c *Connection) Id() string { return c.id }
+// ID returns connection ID in pool.
+func (c *Connection) ID() string { return c.id }
 
 // SetMessageTerminator sets byte that will be used as message terminator.
 func (c *Connection) SetMessageTerminator(t byte) { c.messageTerminator = t }

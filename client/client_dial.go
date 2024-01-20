@@ -16,21 +16,28 @@ import (
 // 'certificate signed by unknown authority' error.
 func (c *Client) DialTo(address string, port int, cert string) error {
 	var config tls.Config
+
 	if cert != "" {
 		certificate, err := os.ReadFile(cert)
 		if err != nil {
-			return fmt.Errorf("[Client] unable to read file: %w", err)
+			return c.FormatError(fmt.Errorf("unable to read file: %w", err))
 		}
+
 		certPool := x509.NewCertPool()
+
 		if ok := certPool.AppendCertsFromPEM(certificate); !ok {
-			return fmt.Errorf("[Client] unable to parse cert from %s: %w", cert, err)
+			return c.FormatError(fmt.Errorf("unable to parse cert from %s: %w", cert, err))
 		}
-		config = tls.Config{RootCAs: certPool}
+
+		config = tls.Config{}
+		config.RootCAs = certPool
+		config.MinVersion = tls.VersionTLS12
 	}
 
-	tlsConn, err := tls.DialWithDialer(&net.Dialer{Timeout: 3 * time.Second}, "tcp", fmt.Sprintf("%s:%d", address, port), &config)
+	tlsConn, err := tls.DialWithDialer(
+		&net.Dialer{Timeout: 3 * time.Second}, "tcp", fmt.Sprintf("%s:%d", address, port), &config)
 	if err != nil {
-		return fmt.Errorf("[Client] unable to dial to %s:%d: %w", address, port, err)
+		return c.FormatError(fmt.Errorf("unable to dial to %s:%d: %w", address, port, err))
 	}
 
 	// We reset data in case client was used before.
@@ -45,8 +52,9 @@ func (c *Client) DialTo(address string, port int, cert string) error {
 
 	cn, err := conn.NewConnection(tlsConn.RemoteAddr(), tlsConn, c.conf.MessageTerminator)
 	if err != nil {
-		return fmt.Errorf("[Client][Dial] error making connection for %v: %w", tlsConn.RemoteAddr(), err)
+		return c.FormatError(fmt.Errorf("dial: error making connection for %v: %w", tlsConn.RemoteAddr(), err))
 	}
+
 	c.conn = cn
 
 	go c.controller()

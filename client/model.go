@@ -8,19 +8,13 @@ import (
 	"github.com/lazybark/go-tls-server/conn"
 )
 
-var ver = semver.Ver{
-	Major:       3,
-	Minor:       1,
-	Patch:       0,
-	Stable:      false,
-	ReleaseNote: "beta",
-}
-
 // Client is the TLS client managing one single connection & statistics.
 //
 // IMPORTANT: it has all stats & methods assigned to the Client struct itself, not to separate Connection struct
 // as server does.
 type Client struct {
+	ver semver.Ver
+
 	// conn is the connection that will be used to read and write bytes.
 	conn *conn.Connection
 
@@ -52,6 +46,11 @@ type Client struct {
 	// mu is used to set client closed to state. It's not protecting stat variables which means
 	// reading and/or writing should not be done concurrently.
 	mu *sync.RWMutex
+
+	// errorPrefix is used as prefix to all errors to identify specific instance of client.
+	//
+	// Default: "TLS_CLIENT".
+	errorPrefix string
 }
 
 // ErrChan returns clients's error channel to read only.
@@ -65,10 +64,10 @@ func (c *Client) MessageChan() <-chan *conn.Message {
 }
 
 // Stats returns number of bytes sent/receive + number of errors.
-func (c *Client) Stats() (sent, received, errors int) { return c.conn.Stats() }
+func (c *Client) Stats() (int, int, int) { return c.conn.Stats() }
 
 // Version returns app version.
-func (c *Client) Version() semver.Ver { return ver }
+func (c *Client) Version() semver.Ver { return c.ver }
 
 // close closes connection and sets internal client vars to stop values.
 func (c *Client) close(withError bool) error {
@@ -98,19 +97,20 @@ func (c *Client) Close() error { return c.close(false) }
 func (c *Client) CloseWithError() error { return c.close(true) }
 
 // Closed returns true if client was closed.
-func (c *Client) Closed() (cl bool) {
-	c.mu.RLock()
-	cl = c.isClosed
-	c.mu.RUnlock()
+func (c *Client) Closed() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	return cl
+	return c.isClosed
 }
 
 // ClosedWithError returns true if client was closed with error.
-func (c *Client) ClosedWithError() (cl bool) {
-	c.mu.RLock()
-	cl = c.isClosedWithError
-	c.mu.RUnlock()
+func (c *Client) ClosedWithError() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	return
+	return c.isClosedWithError
 }
+
+// FormatError adds server's error prefix to err.
+func (c *Client) FormatError(err error) error { return fmt.Errorf("%s: %w", c.errorPrefix, err) }

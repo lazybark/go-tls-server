@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
 	"sync"
 	"time"
@@ -11,16 +12,11 @@ import (
 	"github.com/lazybark/go-tls-server/conn"
 )
 
-var ver = semver.Ver{
-	Major:       3,
-	Minor:       1,
-	Patch:       0,
-	Stable:      false,
-	ReleaseNote: "beta",
-}
-
 type Server struct {
 	ver semver.Ver
+
+	isActive bool
+	mu       *sync.Mutex
 
 	timeStart time.Time
 
@@ -62,8 +58,13 @@ type Server struct {
 	statOverall *Stat
 
 	// ctx is the server context.
-	ctx    context.Context
+	ctx    context.Context //nolint:containedctx // In TODOs
 	cancel context.CancelFunc
+
+	// errorPrefix is used as prefix to all errors to identify specific instance of server.
+	//
+	// Default: "TLS_SERVER".
+	errorPrefix string
 }
 
 // Version returns app version.
@@ -77,3 +78,21 @@ func (s *Server) ErrChan() <-chan error { return s.errChan }
 
 // ConnChan returns server new connections channel available to read only.
 func (s *Server) ConnChan() <-chan *conn.Connection { return s.connChan }
+
+// FormatError adds server's error prefix to err.
+func (s *Server) FormatError(err error) error { return fmt.Errorf("%s: %w", s.errorPrefix, err) }
+
+// SetActive sets server status to the value of active.
+func (s *Server) SetActive(active bool) {
+	s.mu.Lock()
+	s.isActive = active
+	s.mu.Unlock()
+}
+
+// IsActive returns current server status.
+func (s *Server) IsActive() bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	return s.isActive
+}

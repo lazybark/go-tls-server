@@ -28,4 +28,9 @@ type Config struct {
 	// KeepInactiveConnections makes server close connection that had no activity for N mins.
 	// 0 means keep such connection forever.
 	KeepInactiveConnections int
+
+	// ErrorPrefix is used as prefix to all errors to identify specific instance of server.
+	//
+	// Default: "TLS_SERVER"
+	ErrorPrefix string
 }
