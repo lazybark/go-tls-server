@@ -36,17 +36,28 @@ func main() {
 		}
 	}()
 
-	go func() {
-		for m := range tlsClient.MessageChan() {
-			log.Println("Got message:", string(m.Bytes()))
-		}
-		done <- true
-	}()
-
 	err := tlsClient.DialTo("localhost", 5555, `certs/cert.pem`) //nolint:gomnd // It's OK
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	go func() {
+		for tlsClient.Next() {
+			message, err := tlsClient.GetMessage()
+			if err != nil {
+				return
+			}
+
+			log.Println("Got message:", string(message.Bytes()))
+
+			err = tlsClient.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		done <- true
+	}()
 
 	_, err = tlsClient.SendString(ipsum)
 	if err != nil {

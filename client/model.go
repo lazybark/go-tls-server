@@ -58,9 +58,19 @@ func (c *Client) ErrChan() <-chan error {
 	return c.errChan
 }
 
-// MessageChan returns clients's message channel to read only.
-func (c *Client) MessageChan() <-chan *conn.Message {
-	return c.messageChan
+func (c *Client) Next() bool {
+	return !c.conn.Closed()
+}
+
+// GetMessage returns new message or error. Code will be locked until new message appears
+// or connection is closed. The only possible error is conn.ErrConnectionClosed.
+func (c *Client) GetMessage() (*conn.Message, error) {
+	message, ok := <-c.messageChan
+	if !ok {
+		return nil, conn.ErrConnectionClosed
+	}
+
+	return message, nil
 }
 
 // Stats returns number of bytes sent/receive + number of errors.
